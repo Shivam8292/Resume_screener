@@ -60,7 +60,7 @@ const ComparisonView = ({ comparison, onClose }) => {
                                 </div>
                                 <div className="text-right">
                                     <span className={`text-[28px] font-black tracking-tighter ${comparison.better_candidate === c1.filename ? 'text-white' : 'text-black'}`}>
-                                        {Math.round(c1.final_score * 100)}%
+                                        {Math.round(c1.final_score)}%
                                     </span>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@ const ComparisonView = ({ comparison, onClose }) => {
                                 </div>
                                 <div className="text-right">
                                     <span className={`text-[28px] font-black tracking-tighter ${comparison.better_candidate === c2.filename ? 'text-white' : 'text-black'}`}>
-                                        {Math.round(c2.final_score * 100)}%
+                                        {Math.round(c2.final_score)}%
                                     </span>
                                 </div>
                             </div>

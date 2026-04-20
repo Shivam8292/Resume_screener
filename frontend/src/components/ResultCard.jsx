@@ -100,9 +100,16 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
                     </h4>
                     <div className="flex flex-wrap gap-2">
                         {candidate.strengths?.map((s, i) => (
-                            <span key={i} className="px-3 py-2 rounded-xl bg-black/5 border border-black/5 text-[13px] text-black font-semibold">
-                                {s}
-                            </span>
+                            <div key={i} className="group relative">
+                                <span className="px-3 py-2 rounded-xl bg-black/5 border border-black/5 text-[13px] text-black font-semibold cursor-help">
+                                    {typeof s === 'object' ? s.skill : s}
+                                </span>
+                                {typeof s === 'object' && s.evidence && (
+                                    <div className="absolute bottom-full left-0 mb-2 invisible group-hover:visible w-64 p-3 bg-black text-white text-[11px] rounded-lg shadow-xl z-50 transition-all">
+                                        "{s.evidence}"
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -178,11 +185,20 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
                                 Contextual Evidence Chunks
                             </div>
                             <div className="space-y-4">
-                                {candidate.evidence?.map((text, idx) => (
-                                    <blockquote key={idx} className="border-l-2 border-black/10 pl-5 italic text-[13px] bg-white/40 py-3 pr-3 rounded-r-xl">
-                                        "{text}"
-                                    </blockquote>
-                                ))}
+                                {(candidate.strengths && typeof candidate.strengths[0] === 'object') ? (
+                                    candidate.strengths.map((s, idx) => (
+                                        <blockquote key={idx} className="border-l-2 border-black/10 pl-5 italic text-[13px] bg-white/40 py-3 pr-3 rounded-r-xl">
+                                            <span className="block font-black text-black/40 text-[9px] uppercase mb-1">{s.skill}</span>
+                                            "{s.evidence}"
+                                        </blockquote>
+                                    ))
+                                ) : (
+                                    candidate.evidence?.map((text, idx) => (
+                                        <blockquote key={idx} className="border-l-2 border-black/10 pl-5 italic text-[13px] bg-white/40 py-3 pr-3 rounded-r-xl">
+                                            "{text}"
+                                        </blockquote>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </motion.div>
