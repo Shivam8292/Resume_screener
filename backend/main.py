@@ -16,9 +16,10 @@ load_dotenv()
 # Internal Imports
 from utils.pdf_parser import extract_text_from_pdf
 from utils.chunking import chunk_text
-from services.embedding_service import get_embeddings
-from services.llm_service import analyze_resume, compare_candidates
-from services.rag_service import calculate_rag_rankings
+from services.embedding_service import embedding_service
+from services.parsing_service import parsing_service
+from services.extraction_service import extraction_service
+from services.scoring_service import scoring_service
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -193,101 +194,57 @@ async def upload_resumes(files: list[UploadFile] = File(...)):
 @app.post("/rank")
 async def rank_resumes(request: RankRequest):
     """
-    Main entry point for Phase 1: Semantic Embedding Ranking.
-    Replaces keyword matching with full vector-based similarity scoring.
+    Refined /rank endpoint (Phase 11-13).
+    Implements weighted scoring, evidence mapping, and structured ranking.
     """
     try:
-        if not chunk_repository:
-            raise HTTPException(status_code=400, detail="No resumes uploaded. Please upload resumes first.")
+        if not resume_full_texts:
+            raise HTTPException(status_code=400, detail="No resumes in system. Please upload resumes first.")
         
         if not request.job_description.strip():
             raise HTTPException(status_code=400, detail="Job description cannot be empty.")
 
-        logger.info(f"--- Starting Phase 1 Semantic Ranking ---")
+        logger.info(f"--- Starting Recruiter-Grade Analysis Pipeline ---")
         
-        # 1. Generate Embeddings for Job Description
-        # This converts user requirements into a mathematical vector
-        try:
-            jd_embeddings = await asyncio.to_thread(get_embeddings, [request.job_description])
-            if not jd_embeddings:
-                raise ValueError("Embedding engine returned no data")
-            jd_embedding = jd_embeddings[0]
-        except Exception as e:
-            logger.error(f"JD Embedding Error: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Embedding Provider Failure: {str(e)}")
+        # 1. Phase 3: Parse JD into Categories
+        structured_jd = await asyncio.to_thread(parsing_service.parse_job_description, request.job_description)
+        logger.info(f"JD Parsed into categories: {list(structured_jd.keys())}")
         
-        # 2. Compute Semantic RAG Rankings (Similarity with resume chunks)
-        try:
-            rag_data = calculate_rag_rankings(jd_embedding, chunk_repository)
-        except Exception as e:
-            logger.error(f"RAG Error: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"RAG Engine Failure: {str(e)}")
-        
-        # 3. LLM Qualitative Analysis (Phase 5: Parallel Optimization)
+        # 2. Phase 4: Extract Resume Data + Phase 5-10: Score (Parallel for all candidates)
         filenames = list(resume_full_texts.keys())
         
-        # We use return_exceptions=True to ensure one failure doesn't crash the batch
-        llm_results = await asyncio.gather(*[
-            asyncio.to_thread(analyze_resume, request.job_description, resume_full_texts[f])
-            for f in filenames
-        ], return_exceptions=True)
-        
-        # 4. Normalize Scores (0-100) and Merge Data
-        results = []
-        for i, fname in enumerate(filenames):
+        async def analyze_candidate(fname: str, full_text: str):
             try:
-                llm = llm_results[i]
-                if isinstance(llm, Exception):
-                    logger.error(f"LLM failure for {fname}: {str(llm)}")
-                    continue
-                    
-                rag = rag_data.get(fname, {"score": 0.0, "evidence": []})
+                # Phase 4: Structure Extraction
+                extracted_data = await asyncio.to_thread(extraction_service.extract_resume_data, full_text)
                 
-                # Convert 0-1 similarity to 0-100 score
-                semantic_score_100 = rag["score"] * 100
-                ai_score = llm.get("score", 0)
+                # Phase 5-10: Weighted Scoring & Evidence Mapping
+                analysis = await asyncio.to_thread(scoring_service.compute_weighted_score, structured_jd, extracted_data)
                 
-                # Hybrid Scorer: 70% Semantic Vector Similarity + 30% LLM Reasoner
-                final_score = (0.7 * semantic_score_100) + (0.3 * ai_score)
+                # Add metadata
+                analysis["filename"] = fname
+                analysis["name"] = fname.replace(".pdf", "")
                 
-                results.append({
-                    "filename": fname,
-                    "final_score": round(final_score, 1),
-                    "similarity_score": round(semantic_score_100, 1),
-                    "ai_score": round(ai_score, 1),
-                    "rationale": llm.get("rationale", ""),
-                    "strengths": llm.get("strengths", []),
-                    "gaps": llm.get("gaps", []),
-                    "summary": llm.get("summary", ""),
-                    "skills": llm.get("skills", []),
-                    "experience_level": llm.get("experience_level", "N/A"),
-                    "projects": llm.get("projects", []),
-                    "experience_years": llm.get("experience_years", 0),
-                    "meets_experience": llm.get("experience_years", 0) >= llm.get("required_experience", 0),
-                    "evidence": rag.get("evidence", []),
-                    "decision": llm.get("decision", "Reject")
-                })
+                # Merge with extraction for UI
+                analysis["skills"] = extracted_data.get("skills", [])
+                analysis["projects"] = extracted_data.get("projects", [])
+                analysis["experience_years"] = extracted_data.get("experience_years", 0)
+                analysis["experience_level"] = extracted_data.get("experience_level", "Mid")
+                
+                return analysis
             except Exception as e:
-                logger.error(f"Processing error for {fname}: {str(e)}")
-                continue
-        
-        # 5. Sort candidates by Normalized Score
-        results.sort(key=lambda x: x["final_score"], reverse=True)
-        
-        global latest_rankings
-        latest_rankings = results[:10]
-        
-        for idx, item in enumerate(latest_rankings):
-            item["rank"] = idx + 1
-            
-        return latest_rankings
+                logger.error(f"Analysis failure for {fname}: {e}")
+                return None
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        logger.error(f"CRITICAL Pipeline Failure: {traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=f"Internal Pipeline Error: {str(e)}")
+        # Process in parallel with fault tolerance
+        analysis_tasks = [analyze_candidate(f, resume_full_texts[f]) for f in filenames]
+        results = await asyncio.gather(*analysis_tasks)
+        
+        # Filter failures and finalize Phase 11 Ranking
+        final_results = [r for r in results if r is not None]
+        final_results.sort(key=lambda x: x.get("final_score", 0), reverse=True)
+        
+        return final_results
 
     except HTTPException:
         raise
@@ -299,17 +256,40 @@ async def rank_resumes(request: RankRequest):
 @app.post("/improve-resume")
 async def improve_resume_endpoint(request: ImproveRequest):
     """
-    Endpoint for Phase 4: ATS Optimizer.
-    Suggests improvements for a specific resume.
+    Endpoint for Phase 12: ATS Optimizer.
+    Suggests improvements based on structured analysis.
     """
     try:
         resume_text = resume_full_texts.get(request.filename)
         if not resume_text:
             raise HTTPException(status_code=404, detail=f"Resume {request.filename} not found.")
 
-        from services.llm_service import improve_resume
-        res = await asyncio.to_thread(improve_resume, request.job_description, resume_text)
-        return res
+        # Re-use extraction to see what we have
+        extracted_data = await asyncio.to_thread(extraction_service.extract_resume_data, resume_text)
+        
+        # Use LLM to suggest improvements against the specific JD categories
+        from groq import Groq
+        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        
+        prompt = f"""
+        Act as an Elite Career Coach. Optimize this Resume for the Job Description.
+        
+        JD: {request.job_description}
+        Extracted Data: {json.dumps(extracted_data)}
+        
+        Return JSON with:
+        - improved_points: list of rewritten bullet points.
+        - missing_keywords: list of ATS keywords to add.
+        - suggestions: general strategic advice.
+        """
+        
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"},
+        )
+        return json.loads(completion.choices[0].message.content)
+        
     except Exception as e:
         logger.error(f"Improvement Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")

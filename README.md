@@ -58,19 +58,43 @@ Instead of matching local strings, we convert both the JD and the Resume into hi
 5. **Augmentation**: These relevant "evidence" chunks are fed to the LLM to generate precise rationales.
 
 ### 2. Intelligent Skill Mapping (Phase 2)
-Using LLM reasoning, the system identifies:
-- **Conceptual Strengths**: Achievements and skills that match the spirit of the job.
-- **Strategic Gaps**: Missing requirements beyond just literal words.
-- **Experience Levels**: Junior, Mid, or Senior categorization based on project complexity.
+# AI Resume Screener (Recruiter-Grade Upgrade) 🚀🛸
 
-### 3. Explainable AI: Rationale Engine (Phase 3)
-Every score comes with a **Rationale**. The system explains its logic in 2-3 concise lines, ensuring the recruiter understands *why* a candidate was ranked high or low.
+Professional-grade AI Resume Analyzer with a 15-phase intelligence engine designed for high-precision recruiting.
 
-### 4. Resume Rewriter: ATS Optimizer (Phase 4)
-Candidates can receive a custom **Optimization Plan** that includes:
-- Impact-driven bullet point rewrites.
-- Missing ATS-friendly keywords.
-- Strategic career coaching suggestions.
+## Key Features (15-Phase Logic)
+- **Recruiter-Grade Weighted Scoring**: Candidates are scored across five critical technical categories with specific weights:
+  - **Frontend (30%)**
+  - **Backend (25%)**
+  - **Database (15%)**
+  - **Projects (20%)**
+  - **Extras/Tools (10%)**
+- **Semantic Skill Mapping**: Uses LLM-driven conceptual understanding (e.g., matching React to Next.js).
+- **Evidence Mapping (Mandatory)**: Extracts exact lines from resumes to justify every identified strength.
+- **Explainable AI (Rationale Engine)**: 2-3 line factual rationales for every score.
+- **Smart Gap Detection**: Contextual identification of missing categories (e.g., "No backend framework exposure detected").
+- **Confidence Scoring**: High/Medium/Low markers based on evidence quality.
+- **ATS Optimizer (Resume Improver)**: Structured suggestions for bullet point rewriting and keyword optimization.
+
+## Technical Architecture
+- **Backend**: FastAPI (Python)
+- **Intelligence**: Groq Llama 3.3 (Reasoning), OpenAI/HuggingFace (Embeddings)
+- **Storage**: Supabase (Persistent Resumes & Chunks)
+- **Frontend**: React (Vite) + Tailwind CSS
+
+### Directory Structure
+```text
+/backend
+  /services
+    - embedding_service.py  # Production vectors
+    - parsing_service.py    # JD Categorization
+    - extraction_service.py # Resume Data Retrieval
+    - scoring_service.py    # Weighted 15-Phase Engine
+  /utils
+    - text_cleaner.py       # Robust Extraction Fix
+    - pdf_parser.py         # PyMuPDF Integration
+  - main.py                 # FastAPI Standardized Endpoints
+```
 
 ### 5. Recruiter Mode (Phase 5)
 Handles large batches of resumes using **Asynchronous Parallel Processing** with fault tolerance. A single corrupt PDF won't crash your entire screening pipeline.
