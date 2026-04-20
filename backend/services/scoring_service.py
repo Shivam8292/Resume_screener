@@ -98,6 +98,8 @@ class ScoringService:
             # Add metadata for debugging
             analysis["active_categories"] = list(active_weights.keys())
             
+            return analysis
+            
         except Exception as e:
             print(f"Scoring Engine Error: {e}")
             return self._get_error_response(str(e))

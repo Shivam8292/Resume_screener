@@ -198,8 +198,18 @@ async def rank_resumes(request: RankRequest):
     Implements weighted scoring, evidence mapping, and structured ranking.
     """
     try:
+        # State Recovery: If global cache is empty, try fetching from Supabase
+        global resume_full_texts
         if not resume_full_texts:
-            raise HTTPException(status_code=400, detail="No resumes in system. Please upload resumes first.")
+            logger.info("Local resume cache empty. Recovering from Supabase...")
+            response = supabase.table("resumes").select("filename, full_text").execute()
+            if response.data:
+                for item in response.data:
+                    resume_full_texts[item['filename']] = item['full_text']
+                logger.info(f"Recovered {len(response.data)} resumes from database.")
+
+        if not resume_full_texts:
+            raise HTTPException(status_code=400, detail="No resumes found. Please upload resumes first.")
         
         if not request.job_description.strip():
             raise HTTPException(status_code=400, detail="Job description cannot be empty.")
