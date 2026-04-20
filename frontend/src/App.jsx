@@ -21,13 +21,10 @@ function App() {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [comparison, setComparison] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-<<<<<<< HEAD
   const [optimization, setOptimization] = useState(null);
   const [isImproving, setIsImproving] = useState(false);
-=======
   const [showRegistry, setShowRegistry] = useState(false);
   const [lastUploaded, setLastUploaded] = useState(null);
->>>>>>> origin/pr/4
 
   // Phase flags
   const isResultsMode = results.length > 0;
@@ -267,7 +264,7 @@ function App() {
         </AnimatePresence>
 
         {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
@@ -276,27 +273,27 @@ function App() {
             <div className="flex items-center gap-4 p-5">
               <div className="h-10 w-10 shrink-0 bg-red-500 rounded-full flex items-center justify-center text-white">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
               </div>
               <div className="flex-1">
                 <h4 className="text-[14px] font-black text-black uppercase tracking-widest leading-none mb-1">Attention Required</h4>
                 <p className="text-[13px] font-medium text-black/60 leading-relaxed">{error}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setError('')}
                 className="p-2 hover:bg-black/5 rounded-full transition-colors text-black/20 hover:text-black"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
             <div className="h-1 bg-red-500/10 w-full">
-              <motion.div 
+              <motion.div
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
                 transition={{ duration: 10 }}
                 onAnimationComplete={() => setError('')}
-                className="h-full bg-red-500" 
+                className="h-full bg-red-500"
               />
             </div>
           </motion.div>
@@ -305,19 +302,18 @@ function App() {
       </main>
 
       <footer className="w-full py-12 bg-black/[0.07] border-t border-black/5 flex flex-col items-center gap-2">
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-[0.4em]">
-                &copy; 2026 Developed by Shivam8292
-            </span>
-            <span className="text-[9px] font-bold text-black/40 uppercase tracking-[0.2em]">
-                Intelligent Screening System &bull; All rights reserved
-            </span>
+        <span className="text-[10px] font-black text-black/60 uppercase tracking-[0.4em]">
+          &copy; 2026 Developed by Shivam8292
+        </span>
+        <span className="text-[9px] font-bold text-black/40 uppercase tracking-[0.2em]">
+          Intelligent Screening System &bull; All rights reserved
+        </span>
       </footer>
 
       {comparison && (
         <ComparisonView comparison={comparison} onClose={() => setComparison(null)} />
       )}
 
-<<<<<<< HEAD
       {/* Optimization Modal (Phase 6) */}
       <AnimatePresence>
         {optimization && (
@@ -332,18 +328,18 @@ function App() {
                 <div className="flex justify-between items-start mb-8">
                   <div>
                     <div className="flex items-center gap-2 text-[var(--accent)] font-bold text-[12px] uppercase tracking-widest mb-2">
-                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                       Tailored Improvement Plan
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                      Tailored Improvement Plan
                     </div>
                     <h2 className="text-[32px] font-['Instrument_Serif'] italic leading-tight">
                       Optimizing for {optimization.filename.replace('.pdf', '')}
                     </h2>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setOptimization(null)}
                     className="p-2 hover:bg-[var(--bg-sunken)] rounded-full transition-colors"
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                   </button>
                 </div>
 
@@ -403,7 +399,7 @@ function App() {
                 <p className="text-[12px] text-[var(--text-tertiary)] italic max-w-[400px]">
                   These suggestions are generated using LLM reasoning to maximize ATS compatibility and professional impact.
                 </p>
-                <button 
+                <button
                   onClick={() => setOptimization(null)}
                   className="px-8 py-3 bg-[var(--text-primary)] text-white font-bold rounded-xl hover:bg-black transition-all shadow-lg active:scale-95"
                 >
@@ -418,25 +414,25 @@ function App() {
       {/* Loading Overlay for Improvement */}
       {isImproving && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-white/40 backdrop-blur-md">
-           <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-[15px] font-bold text-[var(--text-primary)]">Optimizing Resume Bullet Points...</p>
-           </div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-[15px] font-bold text-[var(--text-primary)]">Optimizing Resume Bullet Points...</p>
+          </div>
         </div>
       )}
-=======
+
       {/* Registry Drawer */}
       <AnimatePresence>
         {showRegistry && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowRegistry(false)}
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[150]"
             />
-            <motion.div 
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -445,11 +441,11 @@ function App() {
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-[24px] font-black tracking-tighter uppercase italic">File Cabinet</h3>
-                <button 
+                <button
                   onClick={() => setShowRegistry(false)}
                   className="p-2 hover:bg-black/5 rounded-full transition-colors text-black/20 hover:text-black"
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
 
@@ -462,7 +458,7 @@ function App() {
                   uploadedFiles.map((file, idx) => {
                     const candidateResult = results.find(r => r.filename === file);
                     return (
-                      <motion.div 
+                      <motion.div
                         key={file}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -473,19 +469,19 @@ function App() {
                           <span className="text-[14px] font-bold text-black uppercase tracking-tight truncate max-w-[200px]">{file}</span>
                           <div className="flex items-center gap-2 mt-1">
                             {candidateResult ? (
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${candidateResult.final_score > 0.7 ? 'text-green-500' : 'text-black/50'}`}>
-                                    MATCH: {Math.round(candidateResult.final_score * 100)}%
-                                </span>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${candidateResult.final_score > 0.7 ? 'text-green-500' : 'text-black/50'}`}>
+                                MATCH: {Math.round(candidateResult.final_score * 100)}%
+                              </span>
                             ) : (
-                                <span className="text-[10px] font-black text-black/50 uppercase tracking-widest">Ready</span>
+                              <span className="text-[10px] font-black text-black/50 uppercase tracking-widest">Ready</span>
                             )}
                           </div>
                         </div>
-                        <button 
-                           onClick={() => handleRemoveFile(file)}
-                           className="p-2 opacity-0 group-hover:opacity-100 text-black/30 hover:text-red-500 transition-all active:scale-90"
+                        <button
+                          onClick={() => handleRemoveFile(file)}
+                          className="p-2 opacity-0 group-hover:opacity-100 text-black/30 hover:text-red-500 transition-all active:scale-90"
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                         </button>
                       </motion.div>
                     );
@@ -494,7 +490,7 @@ function App() {
               </div>
 
               {uploadedFiles.length > 0 && (
-                <button 
+                <button
                   onClick={handleClearAll}
                   className="w-full h-14 bg-red-500 hover:bg-red-600 text-white font-black text-[12px] uppercase tracking-[0.2em] rounded-full transition-all active:scale-95 shadow-xl shadow-red-500/10"
                 >
@@ -505,7 +501,6 @@ function App() {
           </>
         )}
       </AnimatePresence>
->>>>>>> origin/pr/4
     </div>
   );
 }
