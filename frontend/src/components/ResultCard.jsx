@@ -28,45 +28,47 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
 
     return (
         <div
-            className={`relative w-full bg-[var(--bg-surface)] rounded-2xl p-6 border transition-all duration-300 shadow-sm ${isSelected ? 'border-[var(--accent)] ring-1 ring-[var(--accent-subtle)]' : 'border-[var(--border)] hover:border-[var(--border-strong)]'
+            className={`relative w-full bg-white rounded-[24px] p-8 border transition-all duration-400 shadow-sm ${isSelected ? 'border-black ring-4 ring-black/5' : 'border-[#D2D2D7]/40 hover:border-[#D2D2D7] hover:shadow-md'
                 }`}
         >
             {/* Rank Badge */}
-            <div className="absolute top-[-10px] left-6 px-3 py-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-full text-[12px] font-bold text-[var(--accent)] shadow-sm">
-                Candidate #{rank}
+            <div
+                className="absolute top-6 left-[-16px] hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-white border border-black/5 text-[12px] font-black text-black shadow-lg shadow-black/5"
+            >
+                #{rank}
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-6">
                 <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-[20px] text-[var(--text-primary)] tracking-tight">
+                        <h3 className="font-semibold text-[22px] text-black tracking-tight">
                             {candidate.filename.replace('.pdf', '')}
                         </h3>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${badgeTheme.bg} ${badgeTheme.text}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${badgeTheme.bg} ${badgeTheme.text}`}>
                             {candidate.decision || 'Review'}
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-4 text-[13px] text-[var(--text-tertiary)] font-medium">
+                    <div className="flex items-center gap-4 text-[13px] text-black/40 font-medium">
                         <span className="flex items-center gap-1.5">
                             <FileText size={14} />
                             {candidate.experience_level || 'Mid'}
                         </span>
-                        <span className="w-1 h-1 rounded-full bg-[var(--border-strong)]" />
-                        <span>{candidate.experience_years} Years Exp.</span>
+                        <span className="w-1 h-1 rounded-full bg-black/10" />
+                        <span>{candidate.experience_years} Years Professional Exp.</span>
                     </div>
                 </div>
 
                 <div className="text-right flex items-baseline gap-1">
-                    <span className={`text-[48px] font-black tracking-tighter leading-none ${colorTheme.scoreText}`}>
+                    <span className={`text-[54px] font-black tracking-tighter leading-none ${colorTheme.scoreText}`}>
                         {Math.round(scoreVal)}
                     </span>
-                    <span className="text-[18px] font-bold text-[var(--text-tertiary)] tracking-tight">%</span>
+                    <span className="text-[20px] font-bold text-black/20 tracking-tight">%</span>
                 </div>
             </div>
 
             {/* Main Score Progress */}
-            <div className="w-full h-1.5 bg-[var(--bg-sunken)] rounded-full mb-8 overflow-hidden">
+            <div className="w-full h-1.5 bg-black/5 rounded-full mb-8 overflow-hidden">
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${scoreVal}%` }}
@@ -76,29 +78,29 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
             </div>
 
             {/* Rationale Engine (Phase 3 Integration) */}
-            <div className="bg-[var(--accent-subtle)] border border-[var(--accent-subtle)] rounded-xl p-4 mb-8">
-                <div className="flex gap-3">
+            <div className="bg-[#FBFBFD] border border-black/5 rounded-2xl p-5 mb-8">
+                <div className="flex gap-4">
                     <div className="mt-1">
-                        <CheckCircle2 size={18} className="text-[var(--accent)]" />
+                        <CheckCircle2 size={20} className="text-black" />
                     </div>
                     <div>
-                        <h4 className="text-[12px] font-bold text-[var(--accent)] uppercase tracking-wider mb-1">AI Insight</h4>
-                        <p className="text-[14px] text-[var(--text-primary)] leading-relaxed font-medium">
+                        <h4 className="text-[12px] font-black text-black uppercase tracking-widest mb-1">AI Verdict</h4>
+                        <p className="text-[15px] text-black/70 leading-relaxed font-medium">
                             {candidate.rationale || "Processing fit rationale..."}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
                 <div>
-                    <h4 className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-4">
-                        <CheckCircle2 size={14} className="text-[var(--green)]" />
+                    <h4 className="flex items-center gap-2 text-[11px] font-black text-black/30 uppercase tracking-widest mb-4">
+                        <CheckCircle2 size={14} className="text-[#1D1D1F]" />
                         Key Strengths
                     </h4>
                     <div className="flex flex-wrap gap-2">
                         {candidate.strengths?.map((s, i) => (
-                            <span key={i} className="px-3 py-1.5 rounded-lg bg-[var(--bg-sunken)] border border-[var(--border)] text-[13px] text-[var(--text-primary)] font-medium">
+                            <span key={i} className="px-3 py-2 rounded-xl bg-black/5 border border-black/5 text-[13px] text-black font-semibold">
                                 {s}
                             </span>
                         ))}
@@ -106,45 +108,43 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
                 </div>
 
                 <div>
-                    <h4 className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-widest mb-4">
-                        <AlertCircle size={14} className="text-[var(--amber)]" />
-                        Skills Gaps
+                    <h4 className="flex items-center gap-2 text-[11px] font-black text-black/30 uppercase tracking-widest mb-4">
+                        <AlertCircle size={14} className="text-black/30" />
+                        Identified Gaps
                     </h4>
                     <div className="flex flex-wrap gap-2">
                         {candidate.gaps?.map((g, i) => (
-                            <span key={i} className="px-3 py-1.5 rounded-lg bg-[#FAF8F5] border border-[var(--border)] text-[13px] text-[var(--text-secondary)]">
+                            <span key={i} className="px-3 py-2 rounded-xl bg-[#FAF8F5] border border-black/5 text-[13px] text-black/60 font-medium">
                                 {g}
                             </span>
                         ))}
                         {(!candidate.gaps || candidate.gaps.length === 0) && (
-                            <span className="text-[13px] text-[var(--text-tertiary)] italic px-1">No critical gaps identified</span>
+                            <span className="text-[13px] text-black/30 italic px-1">Highly Compatible</span>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Footer Actions */}
-            <div className="border-t border-[var(--border)] pt-5 mt-2 flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="border-t border-black/5 pt-6 mt-2 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-6">
                     <button
                         onClick={() => setExpanded(!expanded)}
-                        className="flex items-center gap-2 text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-black/5 rounded-full text-[12px] font-bold text-black hover:bg-black hover:text-white transition-all duration-300 active:scale-95"
                     >
                         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         View Evidence
                     </button>
 
-                    <label className="flex items-center gap-2.5 cursor-pointer group">
-                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${isSelected ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--border-strong)] bg-white group-hover:border-[var(--accent)]'
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-400 ${isSelected ? 'bg-black border-black shadow-lg shadow-black/20' : 'border-[#D2D2D7] bg-white group-hover:border-black'
                             }`}>
                             {isSelected && (
-                                <svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 5L4 8L11 1" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                <div className="w-1.5 h-1.5 rounded-full bg-white animate-in zoom-in-50 duration-300" />
                             )}
                         </div>
-                        <span className="text-[13px] font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
-                            Multi-Compare
+                        <span className="text-[13px] font-bold text-black/50 group-hover:text-black transition-colors">
+                            Select for Comparison
                         </span>
                         <input
                             type="checkbox"
@@ -157,7 +157,7 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
 
                 <button
                     onClick={() => onImprove(candidate.filename)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[var(--text-primary)] text-white rounded-xl text-[13px] font-bold hover:bg-black transition-all shadow-md active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full text-[13px] font-bold hover:shadow-xl hover:shadow-black/10 transition-all active:scale-95"
                 >
                     <Wand2 size={16} />
                     Improve Resume
@@ -172,14 +172,14 @@ const ResultCard = ({ candidate, onCompareSelect, isSelected, rank, onImprove })
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                     >
-                        <div className="bg-[var(--bg-sunken)] rounded-xl p-5 mt-6 text-[14px] leading-relaxed text-[var(--text-secondary)] border border-[var(--border)]">
-                            <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-bold uppercase tracking-wider text-[11px]">
-                                <FileText size={14} className="text-[var(--accent)]" />
-                                Extracted Evidence Chunks
+                        <div className="bg-[#FBFBFD] rounded-[20px] p-6 mt-8 text-[14px] leading-relaxed text-black/60 border border-black/5 shadow-inner">
+                            <div className="flex items-center gap-2 mb-5 text-black font-black uppercase tracking-widest text-[10px]">
+                                <FileText size={14} className="text-black/30" />
+                                Contextual Evidence Chunks
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {candidate.evidence?.map((text, idx) => (
-                                    <blockquote key={idx} className="border-l-2 border-[var(--accent)] pl-4 italic text-[13px] bg-white/50 py-2 pr-2 rounded">
+                                    <blockquote key={idx} className="border-l-2 border-black/10 pl-5 italic text-[13px] bg-white/40 py-3 pr-3 rounded-r-xl">
                                         "{text}"
                                     </blockquote>
                                 ))}

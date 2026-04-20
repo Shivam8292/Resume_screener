@@ -1,16 +1,23 @@
-# SleekScan: AI-Powered Resume Screener 🚀
+#  Resume Intelligence: High-Precision Candidate Discovery
 
 **SleekScan** is a production-grade, AI-driven resume screening application that goes beyond simple keyword matching. It uses Deep Semantic Embeddings and Large Language Models (LLM) to intelligently rank, analyze, and optimize resumes against specific job descriptions.
 
+![Project Status](https://img.shields.io/badge/UI%2FUX-Apple%20Minimalist-black?style=for-the-badge)
+![Tech Stack](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)
+![Database](https://img.shields.io/badge/Persistence-Supabase-3ECF8E?style=for-the-badge&logo=supabase)
+![Frontend](https://img.shields.io/badge/Core-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)
+
 ---
 
-## 🛠️ Tech Stack
+## 🎨 Design Philosophy: "The Apple Standard"
 
-- **Backend**: FastAPI (Python), PyMuPDF (PDF Extraction).
-- **AI/ML**: HuggingFace (Semantic Embeddings), Groq/Llama 3.3 (Intelligent Inference).
-- **Vector Math**: NumPy & Scikit-Learn (Cosine Similarity).
-- **Database**: Supabase (Cloud Persistence for PDFs and Embeddings).
-- **Frontend**: React (Vite), Tailwind CSS (v4), Framer Motion (Premium Animations).
+This repository features a complete UI/UX overhaul inspired by high-end minimalist design systems. We prioritized **vertical rhythm**, **refractive glass surfaces**, and **cinematic typography** to deliver an experience that feels like a native macOS application.
+
+### Key UX Pillars:
+- **Clean Focus**: A single-line hero header and absolute minimalist input surfaces.
+- **Glassmorphism**: A "Liquid Glass" navigation system with `backdrop-blur-2xl` and refractive shadows.
+- **Micro-Interactions**: Spring-animated error handling and requirement-stack validation meters.
+- **The File Cabinet**: A non-intrusive slide-out registry that manages candidates without shifting the main workspace.
 
 ---
 
@@ -70,22 +77,17 @@ Handles large batches of resumes using **Asynchronous Parallel Processing** with
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start (Local Development)
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Supabase Project (Tables: `resumes`, `chunks`)
-- API Keys: `HF_TOKEN`, `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`
-
-### Backend Setup
+### 1. Intelligence Engine (Backend)
 ```bash
 cd backend
 pip install -r requirements.txt
+# Configure your .env with SUPABASE_URL, SUPABASE_SERVICE_KEY, and GROQ_API_KEY
 uvicorn main:app --reload
 ```
 
-### Frontend Setup
+### 2. Interface (Frontend)
 ```bash
 cd frontend
 npm install
@@ -93,4 +95,22 @@ npm run dev
 ```
 
 ---
-*Developed with a focus on Premium UX and Production Reliability.*
+
+## 🛠 Features at a Glance
+- **Multi-Resume Batching**: Upload dozens of candidate resumes simultaneously.
+- **File Cabinet Management**: Slide-out access to all candidates with real-time match scores.
+- **The Verdict**: Detailed comparative analysis between top-tier candidates.
+- **High-Contrast Error Prevention**: intelligent banners that help you fix setup mistakes before they happen.
+- **Global Minimalist Scrollers**: Custom-designed scrollbars that match the application's aesthetic.
+
+---
+
+## 📜 Credits & Licensing
+- **Original Engine**: Developed by [Shivam8292](https://github.com/Shivam8292)
+- **UI/UX Overhaul**: Refined by [Harshal Patel](https://github.com/HarshalPatel1972)
+- **License**: MIT License
+
+---
+
+> [!NOTE]
+> This project is designed for high-end human resources screening. Always verify candidate credentials beyond automated scoring.
