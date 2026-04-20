@@ -130,7 +130,7 @@ async def upload_resumes(files: list[UploadFile] = File(...)):
                 
                 # Generate embeddings
                 logger.info(f"Generating embeddings for {len(chunks)} chunks of {fname}")
-                embeddings = await asyncio.to_thread(get_embeddings, chunks)
+                embeddings = await asyncio.to_thread(embedding_service.get_embeddings, chunks)
                 
                 if not embeddings or len(embeddings) != len(chunks):
                     processing_errors.append(f"{fname}: Embedding generation mismatch or failure")
