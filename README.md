@@ -43,6 +43,13 @@ graph TD
 ### 1. Semantic RAG Engine (Phase 1)
 Instead of matching local strings, we convert both the JD and the Resume into high-dimensional vectors. This allows us to find a "Conceptual Match"—for example, detecting that "FastAPI" and "Django" both fit the "Backend Developer" requirement.
 
+**How RAG works here:**
+1. **Extraction**: Resumes are parsed into clean text.
+2. **Chunking**: Large resumes are split into smaller, meaningful segments.
+3. **Embedding**: Chunks are converted into 384-dimensional vectors using `MiniLM-L6`.
+4. **Retrieval**: When a JD is submitted, we find the most relevant chunks from the database.
+5. **Augmentation**: These relevant "evidence" chunks are fed to the LLM to generate precise rationales.
+
 ### 2. Intelligent Skill Mapping (Phase 2)
 Using LLM reasoning, the system identifies:
 - **Conceptual Strengths**: Achievements and skills that match the spirit of the job.
