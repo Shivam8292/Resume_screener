@@ -3,57 +3,61 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
+from openai import OpenAI
 
 load_dotenv()
 
-# Embedding Model Configuration
-# We use sentence-transformers as a robust open-source alternative to OpenAI
-MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
-HF_TOKEN = os.getenv("HF_TOKEN", "")
-
-# Initialize Inference Client
-# Modular initialization allows for easy swapping of providers (OpenAI/Azure/HF)
-try:
-    client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-except Exception as e:
-    print(f"Warning: InferenceClient initialization failed: {e}")
-    client = None
-
-def get_embeddings(texts: list[str]) -> list[np.ndarray]:
-    """
-    Convert a list of strings into semantic embeddings.
-    Returns a list of numpy arrays representing the text vectors.
-    """
-    if not texts or not client:
-        return []
-    
-    try:
-        # feature_extraction returns the hidden states (embeddings)
-        embeddings = client.feature_extraction(texts)
+class EmbeddingService:
+    def __init__(self):
+        self.openai_key = os.getenv("OPENAI_API_KEY", "")
+        self.hf_token = os.getenv("HF_TOKEN", "")
+        self.hf_model = "sentence-transformers/all-MiniLM-L6-v2"
         
-        # Normalize output format to always be a list of 1D numpy arrays
-        if isinstance(embeddings, np.ndarray):
-            if embeddings.ndim == 1:
-                return [embeddings]
-            return [v for v in embeddings]
-        
-        return [np.array(v) for v in embeddings]
-        
-    except Exception as e:
-        print(f"Embedding Provider Error: {str(e)}")
-        raise RuntimeError(f"Semantic encoding failed: {str(e)}")
+        # Initialize clients
+        self.openai_client = OpenAI(api_key=self.openai_key) if self.openai_key else None
+        self.hf_client = InferenceClient(model=self.hf_model, token=self.hf_token) if self.hf_token else None
 
-def compute_cosine_similarity(query_vec: np.ndarray, doc_vecs: list[np.ndarray]) -> list[float]:
-    """
-    Compute cosine similarity between a query vector and multiple document vectors.
-    Returns scores as a list of floats.
-    """
-    if not doc_vecs:
-        return []
-    
-    # Reshape for sklearn compatibility
-    q = query_vec.reshape(1, -1)
-    d = np.vstack(doc_vecs)
-    
-    similarities = cosine_similarity(q, d)
-    return similarities[0].tolist()
+    def get_embeddings(self, texts: list[str]) -> list[np.ndarray]:
+        """
+        Convert text to embeddings using OpenAI (preferred) or HuggingFace (fallback).
+        """
+        if not texts:
+            return []
+
+        # Try OpenAI first if key exists
+        if self.openai_client:
+            try:
+                response = self.openai_client.embeddings.create(
+                    input=texts,
+                    model="text-embedding-3-small"
+                )
+                return [np.array(data.embedding) for data in response.data]
+            except Exception as e:
+                print(f"OpenAI Embedding Error: {e}. Falling back to HuggingFace...")
+
+        # Fallback to HuggingFace
+        if self.hf_client:
+            try:
+                embeddings = self.hf_client.feature_extraction(texts)
+                return [np.array(v) for v in embeddings]
+            except Exception as e:
+                print(f"HuggingFace Embedding Error: {e}")
+                raise RuntimeError("All embedding providers failed.")
+        
+        raise RuntimeError("No embedding provider available (check API keys).")
+
+    def compute_similarity(self, query_vec: np.ndarray, doc_vecs: list[np.ndarray]) -> list[float]:
+        """
+        Compute cosine similarity. Used as a 'signal' for the scoring engine.
+        """
+        if not doc_vecs:
+            return []
+        
+        q = query_vec.reshape(1, -1)
+        d = np.vstack(doc_vecs)
+        
+        similarities = cosine_similarity(q, d)
+        return similarities[0].tolist()
+
+# Singleton instance
+embedding_service = EmbeddingService()
