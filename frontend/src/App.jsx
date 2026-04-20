@@ -21,6 +21,8 @@ function App() {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [comparison, setComparison] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [optimization, setOptimization] = useState(null);
+  const [isImproving, setIsImproving] = useState(false);
 
   // Phase flags
   const isResultsMode = results.length > 0;
@@ -127,6 +129,22 @@ function App() {
     }
   };
 
+  const handleImproveResume = async (filename) => {
+    setIsImproving(true);
+    setError('');
+    try {
+      const res = await axios.post(`${API_BASE}/improve-resume`, {
+        job_description: jd,
+        filename: filename
+      });
+      setOptimization({ ...res.data, filename });
+    } catch (err) {
+      setError('Optimization failed. Please try again.');
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
   const resetToSetup = () => {
     setResults([]);
     setSelectedCandidates([]);
@@ -228,6 +246,7 @@ function App() {
                       onCompareSelect={handleCompareSelect}
                       isSelected={selectedCandidates.includes(candidate.filename)}
                       rank={idx + 1}
+                      onImprove={handleImproveResume}
                     />
                   </motion.div>
                 ))}
@@ -247,6 +266,113 @@ function App() {
 
       {comparison && (
         <ComparisonView comparison={comparison} onClose={() => setComparison(null)} />
+      )}
+
+      {/* Optimization Modal (Phase 6) */}
+      <AnimatePresence>
+        {optimization && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl w-full max-w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl border border-[var(--border)]"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-8">
+                  <div>
+                    <div className="flex items-center gap-2 text-[var(--accent)] font-bold text-[12px] uppercase tracking-widest mb-2">
+                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                       Tailored Improvement Plan
+                    </div>
+                    <h2 className="text-[32px] font-['Instrument_Serif'] italic leading-tight">
+                      Optimizing for {optimization.filename.replace('.pdf', '')}
+                    </h2>
+                  </div>
+                  <button 
+                    onClick={() => setOptimization(null)}
+                    className="p-2 hover:bg-[var(--bg-sunken)] rounded-full transition-colors"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-[14px] font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-[var(--accent)] text-white flex items-center justify-center text-[11px]">1</span>
+                        Highest Impact Multipliers
+                      </h3>
+                      <div className="space-y-4">
+                        {optimization.improved_points?.map((p, i) => (
+                          <div key={i} className="group relative bg-[var(--bg-sunken)] p-4 rounded-xl border border-[var(--border)] hover:border-[var(--accent-hover)] transition-all">
+                            <p className="text-[14px] text-[var(--text-primary)] font-medium leading-relaxed">
+                              "{p}"
+                            </p>
+                            <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-[var(--accent)] uppercase">AI Rewritten</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-[14px] font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-[var(--amber)] text-white flex items-center justify-center text-[11px]">2</span>
+                        Missing ATS Keywords
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {optimization.missing_keywords?.map((k, i) => (
+                          <span key={i} className="px-3 py-1.5 rounded-lg bg-[var(--amber-subtle)] border border-[var(--amber)]/20 text-[13px] text-[#b45309] font-bold">
+                            {k}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-[14px] font-bold text-[var(--text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-[var(--text-primary)] text-white flex items-center justify-center text-[11px]">3</span>
+                        Strategic Suggestions
+                      </h3>
+                      <ul className="space-y-3">
+                        {optimization.suggestions?.map((s, i) => (
+                          <li key={i} className="flex gap-3 text-[14px] text-[var(--text-secondary)] leading-relaxed">
+                            <span className="text-[var(--accent)] mt-1">•</span>
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-8 border-t border-[var(--border)] bg-[var(--bg-sunken)] flex justify-between items-center">
+                <p className="text-[12px] text-[var(--text-tertiary)] italic max-w-[400px]">
+                  These suggestions are generated using LLM reasoning to maximize ATS compatibility and professional impact.
+                </p>
+                <button 
+                  onClick={() => setOptimization(null)}
+                  className="px-8 py-3 bg-[var(--text-primary)] text-white font-bold rounded-xl hover:bg-black transition-all shadow-lg active:scale-95"
+                >
+                  Got it
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading Overlay for Improvement */}
+      {isImproving && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-white/40 backdrop-blur-md">
+           <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-[15px] font-bold text-[var(--text-primary)]">Optimizing Resume Bullet Points...</p>
+           </div>
+        </div>
       )}
     </div>
   );
