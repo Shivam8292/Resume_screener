@@ -36,12 +36,16 @@ class ScoringService:
         
         CRITICAL SCORING RULES:
         1. Rate match level for each category: frontend, backend, database, projects, extras (0.0 to 1.0).
-        2. Use SEMANTIC matching (React = Next.js, FastAPI = Django, etc.).
-        3. Missing ONE skill should NOT heavily reduce the category score if other strengths exist.
-        4. Good resumes must land in the 65-85 score range.
-        5. Extract EXACT evidence lines from the resume for each core strength found.
-        6. Identify SMART GAPS (e.g., "No backend framework like FastAPI detected" instead of "FastAPI missing").
-        7. Assign a CONFIDENCE score (HIGH, MEDIUM, LOW) based on evidence quality.
+        2. Use STRONG SEMANTIC matching:
+           - React = ReactJS = Next.js = Frontend Frameworks.
+           - FastAPI = Django = Backend APIs.
+           - Python = Pyhon (handle typos).
+        3. EXPERIENCE LEVEL: If the JD does NOT specify "Senior" or "Lead", do NOT penalize Junior/Student candidates heavily. A matching skill is a match.
+        4. Matching technical skills should result in a category score of 0.85+ even for Juniors.
+        5. Good resumes must land in the 65-85 score range.
+        6. Extract EXACT evidence lines from the resume for each core strength found.
+        7. Identify SMART GAPS: Avoid "Missing X" if a similar tool Y is present.
+        8. Assign a CONFIDENCE score (HIGH, MEDIUM, LOW).
         
         Return ONLY a JSON object with this exact structure:
         {{
