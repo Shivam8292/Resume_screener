@@ -70,17 +70,31 @@ class ScoringService:
             content = completion.choices[0].message.content
             analysis = json.loads(content)
             
-            # Phase 5: Map category scores to weights and Compute Final Weighted Score
-            total_score = 0
+            # Phase 5: Dynamic Weighting Fix
+            # Only count weights for categories that have requirements in the JD
+            # 'projects' is always active (20%)
+            active_weights = {"projects": 20}
+            for cat in ["frontend", "backend", "database", "extras"]:
+                if structured_jd.get(cat):
+                    active_weights[cat] = self.weights[cat]
+            
+            total_active_weight = sum(active_weights.values())
+            
+            # Compute Final Weighted Score using active categories only
+            weighted_sum = 0
             cat_scores = analysis.get("category_scores", {})
-            for cat, weight in self.weights.items():
+            
+            for cat, weight in active_weights.items():
                 score = cat_scores.get(cat, 0)
-                total_score += (score * weight)
+                weighted_sum += (score * weight)
             
-            # Normalize to 0-100 (since weights sum to 100)
-            analysis["final_score"] = round(total_score, 1)
+            # Normalize based on active weights (e.g., if only Frontend/Backend/Projects active, divide by 75)
+            final_normalized = (weighted_sum / total_active_weight) * 100 if total_active_weight > 0 else 0
             
-            return analysis
+            analysis["final_score"] = round(final_normalized, 1)
+            
+            # Add metadata for debugging
+            analysis["active_categories"] = list(active_weights.keys())
             
         except Exception as e:
             print(f"Scoring Engine Error: {e}")
