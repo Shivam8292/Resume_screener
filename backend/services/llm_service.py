@@ -95,12 +95,59 @@ def analyze_resume(job_description: str, resume_text: str):
         return analysis
         
     except Exception as e:
-        print(f"Phase 2 Analysis error: {e}")
+        print(f"Phase 3 Analysis error: {e}")
         return {
-            "score": 0, "strengths": [], "gaps": ["Analysis error happened"], 
+            "score": 0, "rationale": "Mapping failed", "strengths": [], "gaps": ["Analysis error"], 
             "summary": f"Could not analyze: {str(e)}",
             "skills": [], "experience_level": "Error", "projects": [],
             "experience_years": 0, "required_experience": 0, "decision": "Reject"
+        }
+
+def improve_resume(job_description: str, resume_text: str):
+    """
+    Implements Phase 4: Resume Rewriter (ATS Optimizer).
+    Provides improved bullet points, missing keywords, and suggestions.
+    """
+    prompt = f"""
+    Act as an Expert ATS Optimizer and Career Coach. 
+    Rewrite the following Resume to better fit the Job Description (JD).
+    
+    TASKS:
+    1. Rewrite core bullet points to be more 'impactful' (use Action Verbs + Metrics).
+    2. Identify 'missing keywords' that would help clear ATS filters.
+    3. Provide 'suggestions' for layout or missing sections.
+    
+    Job Description:
+    {job_description}
+    
+    Resume:
+    {resume_text}
+    
+    Return ONLY a JSON object:
+    {{
+      "improved_points": ["bullet 1", "bullet 2"...],
+      "missing_keywords": ["keyword 1", "keyword 2"...],
+      "suggestions": ["suggestion 1", "suggestion 2"...]
+    }}
+    """
+    
+    if not client:
+        return {"improved_points": [], "missing_keywords": [], "suggestions": ["Client not initialized"]}
+
+    try:
+        completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"},
+        )
+        content = completion.choices[0].message.content
+        return json.loads(content)
+    except Exception as e:
+        print(f"Improvement error: {e}")
+        return {
+            "improved_points": [], 
+            "missing_keywords": [], 
+            "suggestions": [f"Error during optimization: {str(e)}"]
         }
 
 def compare_candidates(job_description: str, candidate_a: dict, candidate_b: dict):

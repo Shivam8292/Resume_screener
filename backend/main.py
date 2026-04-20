@@ -77,6 +77,10 @@ class CompareRequest(BaseModel):
     job_description: str
     candidates: list[str]
 
+class ImproveRequest(BaseModel):
+    job_description: str
+    filename: str
+
 @app.get("/resumes")
 async def get_uploaded_resumes():
     """Returns the list of filenames currently in the persistent cloud database."""
@@ -285,6 +289,24 @@ async def rank_resumes(request: RankRequest):
         import traceback
         logger.error(f"CRITICAL Rank Error: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Ranking Pipeline Failed: {str(e)}")
+
+@app.post("/improve-resume")
+async def improve_resume_endpoint(request: ImproveRequest):
+    """
+    Endpoint for Phase 4: ATS Optimizer.
+    Suggests improvements for a specific resume.
+    """
+    try:
+        resume_text = resume_full_texts.get(request.filename)
+        if not resume_text:
+            raise HTTPException(status_code=404, detail=f"Resume {request.filename} not found.")
+
+        from services.llm_service import improve_resume
+        res = await asyncio.to_thread(improve_resume, request.job_description, resume_text)
+        return res
+    except Exception as e:
+        logger.error(f"Improvement Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
 
 @app.delete("/delete-resume")
 async def delete_resume(filename: str):
