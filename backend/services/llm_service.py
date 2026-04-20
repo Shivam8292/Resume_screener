@@ -28,10 +28,20 @@ except Exception as e:
     print(f"Error initializing Groq client: {e}")
 
 def analyze_resume(job_description: str, resume_text: str):
-    """Analyze a resume against a job description using Groq LLM."""
+    """
+    Analyzes a resume against a job description using LLM reasoning (Phase 2).
+    Extracts structured skills, projects, and evaluates conceptual gaps.
+    """
     
     prompt = f"""
-    Act as an Expert Technical Recruiter. Analyze this Resume against the JD.
+    Act as an Expert Technical Recruiter specializing in Intelligent Skill Mapping.
+    Analyze the following Resume against the Job Description (JD).
+    
+    CRITICAL INSTRUCTIONS:
+    1. Do NOT use simple keyword matching. Use CONCEPTUAL mapping. 
+       (e.g., if JD asks for 'FastAPI' and candidate has 'Django', they match 'Backend Frameworks').
+    2. Extract specific 'projects' that demonstrate core skills.
+    3. Evaluate 'experience_level' as Junior, Mid, or Senior.
     
     Job Description:
     {job_description}
@@ -39,23 +49,23 @@ def analyze_resume(job_description: str, resume_text: str):
     Resume:
     {resume_text}
     
-    Return a JSON object with:
-    - score: 0-100
-    - matched_skills: list of strings
-    - missing_skills: list of strings
-    - strengths: string
-    - weaknesses: string
-    - experience_years: number (candidate's total years)
-    - required_experience: number (years required in JD)
+    Return ONLY a JSON object with:
+    - score: 0-100 (Integer)
+    - strengths: list of strings (Matched conceptual skills and achievements)
+    - gaps: list of strings (Missing required skills or significant weaknesses)
+    - summary: 2-sentence explanation of the fit.
+    - skills: list of technical skills found.
+    - experience_level: "Junior", "Mid", "Senior", or "Expert"
+    - projects: list of notable projects found.
+    - experience_years: total years of experience.
+    - required_experience: years mentioned in JD.
     - decision: "Shortlist" or "Reject"
-    
-    Return ONLY JSON.
     """
     
     if not client:
         return {
-            "score": 0, "matched_skills": [], "missing_skills": [], 
-            "strengths": "Groq client not initialized", "weaknesses": "Check API key", 
+            "score": 0, "strengths": [], "gaps": [], "summary": "LLM client not initialized.",
+            "skills": [], "experience_level": "N/A", "projects": [],
             "experience_years": 0, "required_experience": 0, "decision": "Reject"
         }
 
@@ -67,13 +77,28 @@ def analyze_resume(job_description: str, resume_text: str):
         )
         content = completion.choices[0].message.content
         if not content:
-            raise ValueError("Empty response from Groq")
-        return json.loads(content)
+            raise ValueError("Empty response from LLM")
+        
+        analysis = json.loads(content)
+        
+        # Ensure required Phase 2 fields exist
+        defaults = {
+            "score": 0, "strengths": [], "gaps": [], "summary": "Analysis failed",
+            "skills": [], "experience_level": "N/A", "projects": [],
+            "experience_years": 0, "required_experience": 0, "decision": "Reject"
+        }
+        for key, val in defaults.items():
+            if key not in analysis:
+                analysis[key] = val
+                
+        return analysis
+        
     except Exception as e:
-        print(f"Groq analyze error: {e}")
+        print(f"Phase 2 Analysis error: {e}")
         return {
-            "score": 0, "matched_skills": [], "missing_skills": [], 
-            "strengths": f"Error: {str(e)}", "weaknesses": "Error", 
+            "score": 0, "strengths": [], "gaps": ["Analysis error happened"], 
+            "summary": f"Could not analyze: {str(e)}",
+            "skills": [], "experience_level": "Error", "projects": [],
             "experience_years": 0, "required_experience": 0, "decision": "Reject"
         }
 
