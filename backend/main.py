@@ -188,6 +188,10 @@ async def upload_resumes(files: list[UploadFile] = File(...)):
 
 @app.post("/rank")
 async def rank_resumes(request: RankRequest):
+    """
+    Main entry point for Phase 1: Semantic Embedding Ranking.
+    Replaces keyword matching with full vector-based similarity scoring.
+    """
     try:
         if not chunk_repository:
             raise HTTPException(status_code=400, detail="No resumes uploaded. Please upload resumes first.")
@@ -195,50 +199,52 @@ async def rank_resumes(request: RankRequest):
         if not request.job_description.strip():
             raise HTTPException(status_code=400, detail="Job description cannot be empty.")
 
-        logger.info(f"--- Starting Ranking Process for {len(resume_full_texts)} resumes ---")
+        logger.info(f"--- Starting Phase 1 Semantic Ranking ---")
         
-        # 1. Embed JD
+        # 1. Generate Embeddings for Job Description
+        # This converts user requirements into a mathematical vector
         try:
             jd_embeddings = await asyncio.to_thread(get_embeddings, [request.job_description])
             if not jd_embeddings:
-                raise ValueError("Failed to generate embedding for job description")
+                raise ValueError("Embedding engine returned no data")
             jd_embedding = jd_embeddings[0]
         except Exception as e:
             logger.error(f"JD Embedding Error: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Embedding Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Embedding Provider Failure: {str(e)}")
         
-        # 2. RAG Ranking + Evidence
+        # 2. Compute Semantic RAG Rankings (Similarity with resume chunks)
         try:
             rag_data = calculate_rag_rankings(jd_embedding, chunk_repository)
         except Exception as e:
-            logger.error(f"RAG Calculation Error: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"RAG Error: {str(e)}")
+            logger.error(f"RAG Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"RAG Engine Failure: {str(e)}")
         
-        # 3. LLM Analysis
+        # 3. LLM Qualitative Analysis
         filenames = list(resume_full_texts.keys())
-        logger.info(f"Analyzing {len(filenames)} candidates with LLM...")
-        
         llm_analyses = await asyncio.gather(*[
             asyncio.to_thread(analyze_resume, request.job_description, resume_full_texts[f])
             for f in filenames
         ])
         
-        # 4. Normalize and Merge
+        # 4. Normalize Scores (0-100) and Merge Data
         results = []
         for i, fname in enumerate(filenames):
             try:
                 llm = llm_analyses[i]
                 rag = rag_data.get(fname, {"score": 0.0, "evidence": []})
                 
-                # Scorer: 0.7 * Sim + 0.3 * (AI/100)
+                # Convert 0-1 similarity to 0-100 score
+                semantic_score_100 = rag["score"] * 100
                 ai_score = llm.get("score", 0)
-                final_score = (0.7 * rag["score"]) + (0.3 * (ai_score / 100))
+                
+                # Hybrid Scorer: 70% Semantic Vector Similarity + 30% LLM Reasoner
+                final_score = (0.7 * semantic_score_100) + (0.3 * ai_score)
                 
                 results.append({
                     "filename": fname,
-                    "final_score": round(final_score, 2),
-                    "similarity_score": round(rag["score"], 2),
-                    "ai_score": ai_score,
+                    "final_score": round(final_score, 1),
+                    "similarity_score": round(semantic_score_100, 1),
+                    "ai_score": round(ai_score, 1),
                     "matched_skills": llm.get("matched_skills", []),
                     "missing_skills": llm.get("missing_skills", []),
                     "experience_years": llm.get("experience_years", 0),
@@ -247,22 +253,26 @@ async def rank_resumes(request: RankRequest):
                     "decision": llm.get("decision", "Reject")
                 })
             except Exception as e:
-                logger.error(f"Merge error for {fname}: {str(e)}")
+                logger.error(f"Processing error for {fname}: {str(e)}")
                 continue
         
-        # 5. Filter & Sort
-        # Ensure we return at least something if anyone exists
+        # 5. Sort candidates by Normalized Score
         results.sort(key=lambda x: x["final_score"], reverse=True)
         
         global latest_rankings
-        latest_rankings = results[:10] # Top 10
+        latest_rankings = results[:10]
         
-        # Add Rank Number
         for idx, item in enumerate(latest_rankings):
             item["rank"] = idx + 1
             
-        logger.info(f"Ranking complete. Found {len(latest_rankings)} results.")
         return latest_rankings
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        logger.error(f"CRITICAL Pipeline Failure: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal Pipeline Error: {str(e)}")
 
     except HTTPException:
         raise

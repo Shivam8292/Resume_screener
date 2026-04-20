@@ -6,40 +6,54 @@ from huggingface_hub import InferenceClient
 
 load_dotenv()
 
-# Official HF Inference Model
+# Embedding Model Configuration
+# We use sentence-transformers as a robust open-source alternative to OpenAI
 MODEL_ID = "sentence-transformers/all-MiniLM-L6-v2"
 HF_TOKEN = os.getenv("HF_TOKEN", "")
 
-# Initialize Client
-client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
+# Initialize Inference Client
+# Modular initialization allows for easy swapping of providers (OpenAI/Azure/HF)
+try:
+    client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
+except Exception as e:
+    print(f"Warning: InferenceClient initialization failed: {e}")
+    client = None
 
 def get_embeddings(texts: list[str]) -> list[np.ndarray]:
-    """Generate embeddings using HuggingFace InferenceClient."""
-    if not texts:
+    """
+    Convert a list of strings into semantic embeddings.
+    Returns a list of numpy arrays representing the text vectors.
+    """
+    if not texts or not client:
         return []
     
     try:
-        # Use feature_extraction which returns embeddings
-        # InferenceClient handles batching and retries internally
+        # feature_extraction returns the hidden states (embeddings)
         embeddings = client.feature_extraction(texts)
         
-        # Convert to numpy array
+        # Normalize output format to always be a list of 1D numpy arrays
         if isinstance(embeddings, np.ndarray):
-            return [embeddings] if embeddings.ndim == 1 else [v for v in embeddings]
+            if embeddings.ndim == 1:
+                return [embeddings]
+            return [v for v in embeddings]
         
         return [np.array(v) for v in embeddings]
         
     except Exception as e:
-        print(f"HF Embedding Error: {str(e)}")
-        raise e
+        print(f"Embedding Provider Error: {str(e)}")
+        raise RuntimeError(f"Semantic encoding failed: {str(e)}")
 
-def compute_similarity(query_embedding: np.ndarray, document_embeddings: list[np.ndarray]) -> list[float]:
-    """Compute cosine similarity between a query and multiple documents."""
-    if not document_embeddings:
+def compute_cosine_similarity(query_vec: np.ndarray, doc_vecs: list[np.ndarray]) -> list[float]:
+    """
+    Compute cosine similarity between a query vector and multiple document vectors.
+    Returns scores as a list of floats.
+    """
+    if not doc_vecs:
         return []
     
-    query_vec = query_embedding.reshape(1, -1)
-    doc_matrix = np.vstack(document_embeddings)
-    similarities = cosine_similarity(query_vec, doc_matrix)
+    # Reshape for sklearn compatibility
+    q = query_vec.reshape(1, -1)
+    d = np.vstack(doc_vecs)
     
+    similarities = cosine_similarity(q, d)
     return similarities[0].tolist()

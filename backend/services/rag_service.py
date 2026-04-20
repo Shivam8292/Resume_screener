@@ -1,9 +1,9 @@
 import numpy as np
-from services.embedding_service import compute_similarity
+from services.embedding_service import compute_cosine_similarity
 
 def calculate_rag_rankings(jd_embedding: np.ndarray, chunk_repository: list[dict]):
     """
-    Groups chunks by filename and calculates RAG scores.
+    Groups chunks by filename and calculates RAG scores utilizing cosine similarity.
     Returns: { filename: { "score": float, "evidence": [str, str] } }
     """
     if not chunk_repository:
@@ -16,12 +16,12 @@ def calculate_rag_rankings(jd_embedding: np.ndarray, chunk_repository: list[dict
         if fname not in files_data:
             files_data[fname] = {"embeddings": [], "texts": []}
         files_data[fname]["embeddings"].append(item["embedding"])
-        files_data[fname]["texts"].append(item["chunk"])
+        files_data[fname].get("texts", []).append(item.get("chunk", ""))
         
     results = {}
     for fname, data in files_data.items():
         # Compute scores for all chunks of this file
-        scores = compute_similarity(jd_embedding, data["embeddings"])
+        scores = compute_cosine_similarity(jd_embedding, data["embeddings"])
         
         # Zip scores with texts
         scored_chunks = sorted(zip(scores, data["texts"]), key=lambda x: x[0], reverse=True)
