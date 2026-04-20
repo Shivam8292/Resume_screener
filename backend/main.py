@@ -223,18 +223,24 @@ async def rank_resumes(request: RankRequest):
             logger.error(f"RAG Error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"RAG Engine Failure: {str(e)}")
         
-        # 3. LLM Qualitative Analysis
+        # 3. LLM Qualitative Analysis (Phase 5: Parallel Optimization)
         filenames = list(resume_full_texts.keys())
-        llm_analyses = await asyncio.gather(*[
+        
+        # We use return_exceptions=True to ensure one failure doesn't crash the batch
+        llm_results = await asyncio.gather(*[
             asyncio.to_thread(analyze_resume, request.job_description, resume_full_texts[f])
             for f in filenames
-        ])
+        ], return_exceptions=True)
         
         # 4. Normalize Scores (0-100) and Merge Data
         results = []
         for i, fname in enumerate(filenames):
             try:
-                llm = llm_analyses[i]
+                llm = llm_results[i]
+                if isinstance(llm, Exception):
+                    logger.error(f"LLM failure for {fname}: {str(llm)}")
+                    continue
+                    
                 rag = rag_data.get(fname, {"score": 0.0, "evidence": []})
                 
                 # Convert 0-1 similarity to 0-100 score
