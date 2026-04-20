@@ -245,6 +245,7 @@ async def rank_resumes(request: RankRequest):
                     "final_score": round(final_score, 1),
                     "similarity_score": round(semantic_score_100, 1),
                     "ai_score": round(ai_score, 1),
+                    "rationale": llm.get("rationale", ""),
                     "strengths": llm.get("strengths", []),
                     "gaps": llm.get("gaps", []),
                     "summary": llm.get("summary", ""),

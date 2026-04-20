@@ -51,6 +51,7 @@ def analyze_resume(job_description: str, resume_text: str):
     
     Return ONLY a JSON object with:
     - score: 0-100 (Integer)
+    - rationale: 2-3 line factual explanation. (e.g., "Matches core frontend requirements but lacks backend experience.")
     - strengths: list of strings (Matched conceptual skills and achievements)
     - gaps: list of strings (Missing required skills or significant weaknesses)
     - summary: 2-sentence explanation of the fit.
@@ -64,8 +65,8 @@ def analyze_resume(job_description: str, resume_text: str):
     
     if not client:
         return {
-            "score": 0, "strengths": [], "gaps": [], "summary": "LLM client not initialized.",
-            "skills": [], "experience_level": "N/A", "projects": [],
+            "score": 0, "rationale": "Groq client not initialized.", "strengths": [], "gaps": [], 
+            "summary": "N/A", "skills": [], "experience_level": "N/A", "projects": [],
             "experience_years": 0, "required_experience": 0, "decision": "Reject"
         }
 
@@ -81,10 +82,10 @@ def analyze_resume(job_description: str, resume_text: str):
         
         analysis = json.loads(content)
         
-        # Ensure required Phase 2 fields exist
+        # Ensure Phase 3 fields exist
         defaults = {
-            "score": 0, "strengths": [], "gaps": [], "summary": "Analysis failed",
-            "skills": [], "experience_level": "N/A", "projects": [],
+            "score": 0, "rationale": "No rationale provided", "strengths": [], "gaps": [], 
+            "summary": "Analysis failed", "skills": [], "experience_level": "N/A", "projects": [],
             "experience_years": 0, "required_experience": 0, "decision": "Reject"
         }
         for key, val in defaults.items():
