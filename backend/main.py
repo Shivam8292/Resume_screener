@@ -89,7 +89,7 @@ async def get_uploaded_resumes():
 
 @app.get("/")
 def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "version": "v15.1-stable"}
 
 @app.post("/upload-resumes")
 async def upload_resumes(files: list[UploadFile] = File(...)):
