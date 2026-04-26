@@ -36,14 +36,12 @@ class ScoringService:
         
         CRITICAL SCORING RULES:
         1. Rate match level for each category: frontend, backend, database, projects, extras (0.0 to 1.0).
-        2. MANDATORY FLOOR: If a skill from the JD is present in the resume, the category score MUST be at least 0.85. 
-           - Example: If JD asks for 'FastAPI' and it's on the resume, Backend score is 0.85 or higher.
-        3. IGNORE SENIORITY BIAS: Do NOT deduct points because the candidate is a student or 'Junior' if they have the skills.
-        4. SEMANTIC ALIASES: React = ReactJS, FASTAPI = Backend API, Python = Pyhon.
-        5. Good resumes with matching skills MUST score in the 75-90 range. 
-        6. Extract EXACT evidence lines from the resume.
-        7. SMART GAPS: ONLY identify a gap if NO similar/equivalent tool is present.
-        8. CONFIDENCE: HIGH (Strong skill match), MEDIUM, LOW.
+        2. ONLY reward points if the exact or semantically equivalent skill is found in the Candidate Data. 
+        3. STRICT PENALTY: If a key technology from the JD (e.g., Java, System Design) is COMPLETELY MISSING from the resume, the category score MUST be 0.0 to 0.3 maximum. Do NOT assume they know it.
+        4. MANDATORY FLOOR: If a skill from the JD *is* present, the category score MUST be at least 0.85.
+        5. IGNORE SENIORITY BIAS: Do NOT deduct points because the candidate is a student or 'Junior' if they actually have the skills.
+        6. Extract EXACT evidence lines from the resume. If there is no evidence for a JD requirement, explicitly list it under "gaps".
+        7. CONFIDENCE: HIGH (Clear evidence), MEDIUM (Implied), LOW (Many missing items).
         
         Return ONLY a JSON object with this exact structure:
         {{
