@@ -242,45 +242,45 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L87",
-      "id": "main_rationale_87",
       "community": 0,
-      "norm_label": "returns the list of filenames currently in the persistent cloud database."
+      "norm_label": "returns the list of filenames currently in the persistent cloud database.",
+      "id": "main_rationale_87"
     },
     {
       "label": "Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L196",
-      "id": "main_rationale_196",
       "community": 0,
-      "norm_label": "refined /rank endpoint (phase 11-13).     implements weighted scoring, evidence"
+      "norm_label": "refined /rank endpoint (phase 11-13).     implements weighted scoring, evidence",
+      "id": "main_rationale_196"
     },
     {
       "label": "Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L268",
-      "id": "main_rationale_268",
       "community": 0,
-      "norm_label": "endpoint for phase 12: ats optimizer.     suggests improvements based on struct"
+      "norm_label": "endpoint for phase 12: ats optimizer.     suggests improvements based on struct",
+      "id": "main_rationale_268"
     },
     {
       "label": "Deletes a specific resume and its chunks using a query parameter for robustness.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L309",
-      "id": "main_rationale_309",
       "community": 0,
-      "norm_label": "deletes a specific resume and its chunks using a query parameter for robustness."
+      "norm_label": "deletes a specific resume and its chunks using a query parameter for robustness.",
+      "id": "main_rationale_309"
     },
     {
       "label": "Clears all resumes and chunks from the system.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L331",
-      "id": "main_rationale_331",
       "community": 0,
-      "norm_label": "clears all resumes and chunks from the system."
+      "norm_label": "clears all resumes and chunks from the system.",
+      "id": "main_rationale_331"
     },
     {
       "label": "test_hf.py",
@@ -341,18 +341,18 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\embedding_service.py",
       "source_location": "L21",
-      "id": "embedding_service_rationale_21",
       "community": 1,
-      "norm_label": "convert text to embeddings using openai (preferred) or huggingface (fallback)."
+      "norm_label": "convert text to embeddings using openai (preferred) or huggingface (fallback).",
+      "id": "embedding_service_rationale_21"
     },
     {
       "label": "Compute cosine similarity. Used as a 'signal' for the scoring engine.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\embedding_service.py",
       "source_location": "L50",
-      "id": "embedding_service_rationale_50",
       "community": 1,
-      "norm_label": "compute cosine similarity. used as a 'signal' for the scoring engine."
+      "norm_label": "compute cosine similarity. used as a 'signal' for the scoring engine.",
+      "id": "embedding_service_rationale_50"
     },
     {
       "label": "extraction_service.py",
@@ -395,9 +395,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\extraction_service.py",
       "source_location": "L14",
-      "id": "extraction_service_rationale_14",
       "community": 4,
-      "norm_label": "phase 4: extract structured skills, projects, experience, and domains."
+      "norm_label": "phase 4: extract structured skills, projects, experience, and domains.",
+      "id": "extraction_service_rationale_14"
     },
     {
       "label": "groq_service.py",
@@ -431,18 +431,18 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\groq_service.py",
       "source_location": "L11",
-      "id": "groq_service_rationale_11",
       "community": 5,
-      "norm_label": "analyze a resume against a job description using groq llm."
+      "norm_label": "analyze a resume against a job description using groq llm.",
+      "id": "groq_service_rationale_11"
     },
     {
       "label": "Generate a qualitative comparison between two candidates using Groq.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\groq_service.py",
       "source_location": "L63",
-      "id": "groq_service_rationale_63",
       "community": 5,
-      "norm_label": "generate a qualitative comparison between two candidates using groq."
+      "norm_label": "generate a qualitative comparison between two candidates using groq.",
+      "id": "groq_service_rationale_63"
     },
     {
       "label": "parsing_service.py",
@@ -485,9 +485,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\parsing_service.py",
       "source_location": "L14",
-      "id": "parsing_service_rationale_14",
       "community": 6,
-      "norm_label": "phase 3: convert jd into structured categories."
+      "norm_label": "phase 3: convert jd into structured categories.",
+      "id": "parsing_service_rationale_14"
     },
     {
       "label": "scoring_service.py",
@@ -529,7 +529,7 @@
       "label": "._get_error_response()",
       "file_type": "code",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\scoring_service.py",
-      "source_location": "L107",
+      "source_location": "L105",
       "id": "scoring_service_scoringservice_get_error_response",
       "community": 3,
       "norm_label": "._get_error_response()"
@@ -539,9 +539,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\scoring_service.py",
       "source_location": "L21",
-      "id": "scoring_service_rationale_21",
       "community": 3,
-      "norm_label": "phase 5, 6, 7, 8, 9, 10: the core intelligence engine.         returns a compre"
+      "norm_label": "phase 5, 6, 7, 8, 9, 10: the core intelligence engine.         returns a compre",
+      "id": "scoring_service_rationale_21"
     },
     {
       "label": "__init__.py",
@@ -575,9 +575,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\utils\\chunking.py",
       "source_location": "L2",
-      "id": "chunking_rationale_2",
       "community": 7,
-      "norm_label": "split text into chunks of words with overlap."
+      "norm_label": "split text into chunks of words with overlap.",
+      "id": "chunking_rationale_2"
     },
     {
       "label": "pdf_parser.py",
@@ -611,9 +611,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\utils\\pdf_parser.py",
       "source_location": "L15",
-      "id": "pdf_parser_rationale_15",
       "community": 2,
-      "norm_label": "extract text from pdf bytes using pymupdf and clean it."
+      "norm_label": "extract text from pdf bytes using pymupdf and clean it.",
+      "id": "pdf_parser_rationale_15"
     },
     {
       "label": "text_cleaner.py",
@@ -638,9 +638,9 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\utils\\text_cleaner.py",
       "source_location": "L4",
-      "id": "text_cleaner_rationale_4",
       "community": 2,
-      "norm_label": "cleans extracted resume text while preserving structure.     - removes excessiv"
+      "norm_label": "cleans extracted resume text while preserving structure.     - removes excessiv",
+      "id": "text_cleaner_rationale_4"
     },
     {
       "label": "__init__.py",
@@ -1389,7 +1389,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\services\\scoring_service.py",
-      "source_location": "L107",
+      "source_location": "L105",
       "weight": 1.0,
       "_src": "scoring_service_scoringservice",
       "_tgt": "scoring_service_scoringservice_get_error_response",

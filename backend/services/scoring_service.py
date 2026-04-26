@@ -37,8 +37,8 @@ class ScoringService:
         CRITICAL SCORING RULES:
         1. Rate match level for each category: frontend, backend, database, projects, extras (0.0 to 1.0).
         2. ONLY reward points if the exact or semantically equivalent skill is found in the Candidate Data. 
-        3. STRICT PENALTY: If a key technology from the JD (e.g., Java, System Design) is COMPLETELY MISSING from the resume, the category score MUST be 0.0 to 0.3 maximum. Do NOT assume they know it.
-        4. MANDATORY FLOOR: If a skill from the JD *is* present, the category score MUST be at least 0.85.
+        3. STRICT PENALTY: If ANY skill or requirement explicitly requested in the JOB REQUIREMENTS is COMPLETELY MISSING from the Candidate Data, the corresponding category score MUST be severely penalized (0.0 to 0.3 maximum). ALWAYS verify evidence. Do NOT assume the candidate knows it based on unrelated experience.
+        4. MANDATORY FLOOR: If an important skill from the JD *is* present in the resume, the category score MUST be at least 0.85.
         5. IGNORE SENIORITY BIAS: Do NOT deduct points because the candidate is a student or 'Junior' if they actually have the skills.
         6. Extract EXACT evidence lines from the resume. If there is no evidence for a JD requirement, explicitly list it under "gaps".
         7. CONFIDENCE: HIGH (Clear evidence), MEDIUM (Implied), LOW (Many missing items).
