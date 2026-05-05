@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Upload, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const UploadSection = ({ onUpload, status, lastFile }) => {
+const UploadSection = ({ onUpload, status, lastFile, onRemoveFile }) => {
     const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
@@ -79,9 +79,18 @@ const UploadSection = ({ onUpload, status, lastFile }) => {
                                 <span className="text-[10px] text-black/50 font-black uppercase tracking-widest mt-0.5">Recently Added</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-green-600/70">Ready</span>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
+                                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-green-600/70">Ready</span>
+                            </div>
+                            <button 
+                                onClick={() => onRemoveFile(lastFile)}
+                                className="p-2 hover:bg-red-50 rounded-full text-black/20 hover:text-red-500 transition-colors"
+                                title="Remove file"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                            </button>
                         </div>
                     </motion.div>
                 )}

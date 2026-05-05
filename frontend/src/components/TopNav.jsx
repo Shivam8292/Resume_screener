@@ -10,16 +10,6 @@ const TopNav = ({ uploadedCount, onUploadClick, onReset, onRegistryClick }) => {
                 <div className="h-2.5 w-2.5 rounded-full bg-black group-hover:scale-125 transition-all shadow-[0_0_10px_rgba(0,0,0,0.2)]" />
                 <span className="font-[Inter] font-extrabold text-[16px] text-black tracking-tight">Resume Screener</span>
             </div>
-
-            <div className="flex items-center gap-4">
-                <button
-                    onClick={onUploadClick}
-                    className="flex items-center gap-2.5 text-[13px] font-bold text-white bg-black hover:bg-black/80 px-6 py-2.5 rounded-full transition-all duration-300 active:scale-95 shadow-2xl shadow-black/20"
-                >
-                    <UploadCloud size={16} />
-                    <span>New Scan</span>
-                </button>
-            </div>
         </nav>
     );
 };

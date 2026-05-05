@@ -90,16 +90,8 @@ const Sidebar = ({
         </div>
       </div>
 
-      {/* Sidebar Footer / Upload Action */}
-      <div className="p-6 border-t border-[var(--border)] space-y-4">
-        <button 
-          onClick={onUploadClick}
-          className="w-full h-11 flex items-center justify-center gap-2 border-2 border-dashed border-[var(--border-strong)] rounded-2xl text-[12px] font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
-        >
-          <Upload size={16} />
-          Upload More
-        </button>
-
+      {/* Sidebar Footer - Only Clear All */}
+      <div className="p-6 border-t border-[var(--border)]">
         {uploadedFiles.length > 0 && (
           <button 
             onClick={onClearAll}
