@@ -152,6 +152,8 @@ function App() {
     setResults([]);
     setSelectedCandidates([]);
     setComparison(null);
+    setJd(''); // Clear JD on new scan
+    setError('');
   };
 
   return (
@@ -477,12 +479,25 @@ function App() {
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleRemoveFile(file)}
-                          className="p-2 opacity-0 group-hover:opacity-100 text-black/30 hover:text-red-500 transition-all active:scale-90"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setUploadStatus('Syncing...');
+                              handleRank(); // Re-trigger analysis as a "sync" action
+                            }}
+                            className="p-2 opacity-0 group-hover:opacity-100 text-black/30 hover:text-[var(--accent)] transition-all active:scale-90"
+                            title="Re-sync analysis"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                          </button>
+                          <button
+                            onClick={() => handleRemoveFile(file)}
+                            className="p-2 opacity-0 group-hover:opacity-100 text-black/30 hover:text-red-500 transition-all active:scale-90"
+                            title="Delete resume"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                          </button>
+                        </div>
                       </motion.div>
                     );
                   })
