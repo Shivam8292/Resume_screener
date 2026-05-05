@@ -12,15 +12,6 @@ const TopNav = ({ uploadedCount, onUploadClick, onReset, onRegistryClick }) => {
             </div>
 
             <div className="flex items-center gap-4">
-                <button 
-                    onClick={onRegistryClick}
-                    className="flex items-center gap-2.5 bg-black/5 hover:bg-black/10 px-5 py-2.5 rounded-full border border-black/5 transition-all active:scale-95"
-                >
-                    <Database size={16} className="text-black/40" />
-                    <span className="text-[11px] font-black text-black uppercase tracking-widest">
-                        {uploadedCount} Files
-                    </span>
-                </button>
                 <button
                     onClick={onUploadClick}
                     className="flex items-center gap-2.5 text-[13px] font-bold text-white bg-black hover:bg-black/80 px-6 py-2.5 rounded-full transition-all duration-300 active:scale-95 shadow-2xl shadow-black/20"

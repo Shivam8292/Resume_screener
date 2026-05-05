@@ -36,6 +36,20 @@
   --red-subtle: #FEE2E2;
 }
 
+[data-theme='dark'] {
+  --bg-base: #0D0D0D;
+  --bg-surface: #171717;
+  --bg-sunken: #1F1F1F;
+  --border: #2A2A2A;
+  --border-strong: #333333;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #52525B;
+  --accent: #8B5CF6;
+  --accent-hover: #A78BFA;
+  --accent-subtle: #1E1B4B;
+}
+
 /* Global Robust Scroller */
 ::-webkit-scrollbar {
   width: 10px;

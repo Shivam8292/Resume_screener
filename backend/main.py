@@ -49,27 +49,15 @@ latest_rankings: list[dict] = []
 
 @app.on_event("startup")
 async def startup_event():
-    # Hydrate memory from Supabase
+    # Only fetch metadata (filenames) to make startup INSTANT
     try:
-        # 1. Fetch Resumes
-        res_resumes = supabase.table("resumes").select("*").execute()
-        for r in res_resumes.data:
-            resume_full_texts[r["filename"]] = r["full_text"]
-        
-        # 2. Fetch Chunks
-        res_chunks = supabase.table("chunks").select("*").execute()
-        for c in res_chunks.data:
-            # Embedding is stored as a list in JSONB format in Supabase
-            embedding = np.array(c["embedding"], dtype=np.float32)
-            chunk_repository.append({
-                "filename": c["filename"],
-                "chunk": c["chunk_text"],
-                "embedding": embedding
-            })
-            
-        logger.info(f"Supabase Hydration Complete: {len(resume_full_texts)} resumes, {len(chunk_repository)} chunks.")
+        res = supabase.table("resumes").select("filename").execute()
+        for r in res.data:
+            if r["filename"] not in resume_full_texts:
+                resume_full_texts[r["filename"]] = None # Mark as existing but not loaded
+        logger.info(f"Startup Complete: {len(resume_full_texts)} resumes indexed.")
     except Exception as e:
-        logger.error(f"Failed to hydrate from Supabase: {str(e)}")
+        logger.error(f"Startup metadata fetch failed: {str(e)}")
 
 class RankRequest(BaseModel):
     job_description: str
@@ -269,15 +257,17 @@ async def rank_resumes(request: RankRequest):
     Implements weighted scoring, evidence mapping, and structured ranking.
     """
     try:
-        # State Recovery: If global cache is empty, try fetching from Supabase
+        # State Recovery: Fetch all texts if memory is empty or entries are not loaded
         global resume_full_texts
-        if not resume_full_texts:
-            logger.info("Local resume cache empty. Recovering from Supabase...")
+        needs_fetch = not resume_full_texts or any(v is None for v in resume_full_texts.values())
+        
+        if needs_fetch:
+            logger.info("Fetching full resume texts from Supabase for analysis...")
             response = supabase.table("resumes").select("filename, full_text").execute()
             if response.data:
                 for item in response.data:
                     resume_full_texts[item['filename']] = item['full_text']
-                logger.info(f"Recovered {len(response.data)} resumes from database.")
+                logger.info(f"Loaded {len(response.data)} resumes into memory.")
 
         if not resume_full_texts:
             raise HTTPException(status_code=400, detail="No resumes found. Please upload resumes first.")
