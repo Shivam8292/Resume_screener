@@ -97,99 +97,170 @@ async def upload_resumes(files: list[UploadFile] = File(...)):
         raise HTTPException(status_code=400, detail="No files provided")
         
     try:
-        logger.info(f"--- Starting Supabase Upload Process for {len(files)} files ---")
-        new_chunks_count = 0
-        processing_errors = []
-
-        for file in files:
+        logger.info(f"--- Starting Super-Batch Upload Process for {len(files)} files ---")
+        
+        # 1. Parallel Text Extraction
+        async def get_file_content(file: UploadFile):
             fname = file.filename
-            logger.info(f"Processing candidate file: {fname}")
-            
             try:
                 content = await file.read()
-                if not content:
-                    processing_errors.append(f"{fname}: File is empty")
-                    continue
-                    
-                # Extract text
                 text = await asyncio.to_thread(extract_text_from_pdf, content)
-                
-                if not text.strip():
-                    processing_errors.append(f"{fname}: No readable text (might be scanned/image-only PDF)")
-                    continue
-                    
-                # 1. Save to Supabase (Metadata)
-                supabase.table("resumes").upsert({"filename": fname, "full_text": text}).execute()
-                resume_full_texts[fname] = text
-                
-                # Chunk text
-                chunks = chunk_text(text)
-                if not chunks:
-                    processing_errors.append(f"{fname}: Text too short to process")
-                    continue
-                
-                # Generate embeddings
-                logger.info(f"Generating embeddings for {len(chunks)} chunks of {fname}")
-                embeddings = await asyncio.to_thread(embedding_service.get_embeddings, chunks)
-                
-                if not embeddings or len(embeddings) != len(chunks):
-                    processing_errors.append(f"{fname}: Embedding generation mismatch or failure")
-                    continue
-                
-                # 2. Save Chunks + Embeddings to Supabase
-                # Clean old chunks if re-uploading
-                supabase.table("chunks").delete().eq("filename", fname).execute()
-                
-                chunk_data_to_insert = []
-                for i, chunk_content in enumerate(chunks):
-                    emb = embeddings[i]
-                    # We store embedding as a list for JSONB compatibility
-                    chunk_data_to_insert.append({
-                        "filename": fname,
-                        "chunk_text": chunk_content,
-                        "embedding": emb.tolist()
-                    })
-                    
-                    chunk_repository.append({
-                        "filename": fname,
-                        "chunk": chunk_content,
-                        "embedding": emb
-                    })
-                    new_chunks_count += 1
-                
-                if chunk_data_to_insert:
-                    supabase.table("chunks").insert(chunk_data_to_insert).execute()
-                    
-                logger.info(f"Successfully processed and stored {fname} in Supabase")
-                
-            except Exception as file_error:
-                error_msg = f"{fname}: {str(file_error)}"
-                logger.error(f"Failed to process file {fname}: {error_msg}")
-                processing_errors.append(error_msg)
-                continue
-                
-        logger.info(f"Batch processing complete. Total new chunks added: {new_chunks_count}")
+                return {"filename": fname, "text": text, "error": None}
+            except Exception as e:
+                return {"filename": fname, "text": "", "error": str(e)}
+
+        file_results = await asyncio.gather(*[get_file_content(f) for f in files])
         
-        if new_chunks_count == 0:
-            error_details = "; ".join(processing_errors) if processing_errors else "Unknown processing error"
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Upload Failed: {error_details}"
-            )
+        all_resumes_to_upsert = []
+        all_chunks_to_insert = []
+        all_text_to_embed = []
+        chunk_mapping = [] # To map embeddings back to files
+        processing_errors = []
+
+        for res in file_results:
+            fname = res["filename"]
+            if res["error"]:
+                processing_errors.append(res["error"])
+                continue
+            
+            text = res["text"]
+            if not text.strip():
+                processing_errors.append(f"{fname}: No readable text")
+                continue
+            
+            # Prepare Resume Data
+            all_resumes_to_upsert.append({"filename": fname, "full_text": text})
+            resume_full_texts[fname] = text
+            
+            # Prepare Chunks for this file
+            chunks = chunk_text(text)
+            for c_text in chunks:
+                all_text_to_embed.append(c_text)
+                chunk_mapping.append({"filename": fname, "text": c_text})
+
+        if not all_text_to_embed:
+            error_msg = "; ".join(processing_errors) if processing_errors else "No valid text found"
+            raise HTTPException(status_code=400, detail=f"Upload Failed: {error_msg}")
+
+        # 2. Batch Embedding Generation (Single API Call for ALL chunks)
+        logger.info(f"Generating embeddings for TOTAL {len(all_text_to_embed)} chunks across all files...")
+        all_embeddings = await asyncio.to_thread(embedding_service.get_embeddings, all_text_to_embed)
+        
+        if not all_embeddings or len(all_embeddings) != len(all_text_to_embed):
+            raise HTTPException(status_code=500, detail="Batch embedding generation failed")
+
+        # 3. Prepare Bulk Data for Database
+        filenames_to_clean = [r["filename"] for r in all_resumes_to_upsert]
+        
+        for i, emb in enumerate(all_embeddings):
+            meta = chunk_mapping[i]
+            all_chunks_to_insert.append({
+                "filename": meta["filename"],
+                "chunk_text": meta["text"],
+                "embedding": emb.tolist()
+            })
+            
+            # Update local memory repository
+            chunk_repository.append({
+                "filename": meta["filename"],
+                "chunk": meta["text"],
+                "embedding": emb
+            })
+
+        # 4. Bulk Database Operations
+        logger.info(f"Executing bulk database operations for {len(all_resumes_to_upsert)} resumes...")
+        
+        # Delete old chunks for these files in one go
+        supabase.table("chunks").delete().in_("filename", filenames_to_clean).execute()
+        
+        # Upsert all resumes
+        supabase.table("resumes").upsert(all_resumes_to_upsert).execute()
+        
+        # Insert all chunks in bulk
+        if all_chunks_to_insert:
+            # Note: Supabase/PostgREST handles large bulk inserts well
+            supabase.table("chunks").insert(all_chunks_to_insert).execute()
+            
+        logger.info("Super-Batch processing complete.")
 
         return {
-            "count": len(files), 
-            "chunks": new_chunks_count, 
+            "count": len(all_resumes_to_upsert), 
+            "chunks": len(all_chunks_to_insert), 
             "status": "success",
-            "errors": processing_errors # Return partial errors if any
+            "errors": processing_errors
         }
     except HTTPException:
         raise
     except Exception as e:
         import traceback
-        error_details = traceback.format_exc()
-        logger.error(f"CRITICAL Upload error: {str(e)}\n{error_details}")
+        logger.error(f"CRITICAL Super-Batch Upload error: {str(e)}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@app.post("/compare")
+async def compare_candidates_endpoint(request: CompareRequest):
+    """
+    Generate a qualitative comparison between two candidates using Groq.
+    """
+    try:
+        if len(request.candidates) != 2:
+            raise HTTPException(status_code=400, detail="Must provide exactly two candidates for comparison.")
+
+        # 1. Gather data for both candidates
+        comparison_data = {}
+        for fname in request.candidates:
+            text = resume_full_texts.get(fname)
+            if not text:
+                raise HTTPException(status_code=404, detail=f"Candidate data for {fname} not found.")
+            
+            # Extract data for context
+            extracted = await asyncio.to_thread(extraction_service.extract_resume_data, text)
+            # Get score
+            analysis = await asyncio.to_thread(scoring_service.compute_weighted_score, 
+                                             parsing_service.parse_job_description(request.job_description), 
+                                             extracted)
+            
+            comparison_data[fname] = {
+                "filename": fname,
+                "final_score": analysis.get("final_score", 0),
+                "experience_years": extracted.get("experience_years", 0),
+                "matched_skills": extracted.get("skills", [])[:5] # Top 5 skills
+            }
+
+        # 2. Use LLM for Qualitative "Reason"
+        from groq import Groq
+        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        
+        prompt = f"""
+        Act as a Senior Hiring Manager. Compare these two candidates for the Job Description.
+        
+        JD: {request.job_description}
+        
+        Candidate A ({request.candidates[0]}): {json.dumps(comparison_data[request.candidates[0]])}
+        Candidate B ({request.candidates[1]}): {json.dumps(comparison_data[request.candidates[1]])}
+        
+        Provide a 2-3 sentence verdict on who is better and WHY. 
+        Return JSON with:
+        - reason: "The qualitative verdict"
+        - better_candidate: "The filename of the winner"
+        """
+        
+        completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            response_format={"type": "json_object"},
+        )
+        
+        verdict = json.loads(completion.choices[0].message.content)
+        
+        return {
+            "reason": verdict.get("reason"),
+            "better_candidate": verdict.get("better_candidate"),
+            "comparison": comparison_data
+        }
+
+    except Exception as e:
+        logger.error(f"Comparison Error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
 
 @app.post("/rank")
 async def rank_resumes(request: RankRequest):
