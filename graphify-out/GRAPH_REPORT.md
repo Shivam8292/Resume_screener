@@ -1,12 +1,12 @@
 # Graph Report - C:\Users\shiva\Desktop\first_project  (2026-05-06)
 
 ## Corpus Check
-- 30 files · ~20,309 words
+- 31 files · ~20,237 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 88 nodes · 67 edges · 28 communities detected
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.8)
+- 97 nodes · 71 edges · 34 communities detected
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -38,18 +38,24 @@
 - [[_COMMUNITY_Community 25|Community 25]]
 - [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `test_diagnostics()` - 4 edges
 2. `EmbeddingService` - 4 edges
 3. `ScoringService` - 4 edges
 4. `extract_text_from_pdf()` - 4 edges
-5. `ExtractionService` - 3 edges
-6. `ParsingService` - 3 edges
-7. `chunk_text()` - 3 edges
-8. `RankRequest` - 2 edges
-9. `CompareRequest` - 2 edges
-10. `ImproveRequest` - 2 edges
+5. `compare_candidates_endpoint()` - 3 edges
+6. `ExtractionService` - 3 edges
+7. `ParsingService` - 3 edges
+8. `chunk_text()` - 3 edges
+9. `RankRequest` - 2 edges
+10. `CompareRequest` - 2 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_diagnostics()` --calls--> `extract_text_from_pdf()`  [INFERRED]
@@ -68,24 +74,24 @@ Cohesion: 0.25
 Nodes (4): test_diagnostics(), EmbeddingService, Convert text to embeddings using OpenAI (preferred) or HuggingFace (fallback)., Compute cosine similarity. Used as a 'signal' for the scoring engine.
 
 ### Community 2 - "Community 2"
+Cohesion: 0.29
+Nodes (4): compare_candidates_endpoint(), Generate a qualitative comparison between two candidates using Groq., ParsingService, Phase 3: Convert JD into structured categories.
+
+### Community 3 - "Community 3"
 Cohesion: 0.33
 Nodes (5): clean_resume_text(), extract_text_from_pdf(), Extract text from PDF bytes using PyMuPDF and clean it., clean_resume_text(), Cleans extracted resume text while preserving structure.     - Removes excessiv
 
-### Community 3 - "Community 3"
+### Community 4 - "Community 4"
 Cohesion: 0.4
 Nodes (2): Phase 5, 6, 7, 8, 9, 10: The Core Intelligence Engine.         Returns a compre, ScoringService
 
-### Community 4 - "Community 4"
+### Community 5 - "Community 5"
 Cohesion: 0.4
 Nodes (2): ExtractionService, Phase 4: Extract structured skills, projects, experience, and domains.
 
-### Community 5 - "Community 5"
-Cohesion: 0.4
-Nodes (4): analyze_resume(), compare_candidates(), Analyze a resume against a job description using Groq LLM., Generate a qualitative comparison between two candidates using Groq.
-
 ### Community 6 - "Community 6"
 Cohesion: 0.4
-Nodes (2): ParsingService, Phase 3: Convert JD into structured categories.
+Nodes (4): analyze_resume(), compare_candidates(), Analyze a resume against a job description using Groq LLM., Generate a qualitative comparison between two candidates using Groq.
 
 ### Community 7 - "Community 7"
 Cohesion: 0.5
@@ -171,8 +177,32 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 28 - "Community 28"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 29 - "Community 29"
+Cohesion: 1.0
+Nodes (1): Returns the list of filenames currently in the persistent cloud database.
+
+### Community 30 - "Community 30"
+Cohesion: 1.0
+Nodes (1): Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence
+
+### Community 31 - "Community 31"
+Cohesion: 1.0
+Nodes (1): Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct
+
+### Community 32 - "Community 32"
+Cohesion: 1.0
+Nodes (1): Deletes a specific resume and its chunks using a query parameter for robustness.
+
+### Community 33 - "Community 33"
+Cohesion: 1.0
+Nodes (1): Clears all resumes and chunks from the system.
+
 ## Knowledge Gaps
-- **15 isolated node(s):** `Returns the list of filenames currently in the persistent cloud database.`, `Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence`, `Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct`, `Deletes a specific resume and its chunks using a query parameter for robustness.`, `Clears all resumes and chunks from the system.` (+10 more)
+- **21 isolated node(s):** `Returns the list of filenames currently in the persistent cloud database.`, `Generate a qualitative comparison between two candidates using Groq.`, `Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence`, `Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct`, `Deletes a specific resume and its chunks using a query parameter for robustness.` (+16 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **Thin community `Community 8`** (2 nodes): `create_test_pdf.py`, `create_pdf()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -190,43 +220,55 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 15`** (2 nodes): `ResultCard.jsx`, `ResultCard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 16`** (2 nodes): `TopNav.jsx`, `TopNav()`
+- **Thin community `Community 16`** (2 nodes): `Sidebar.jsx`, `Sidebar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (2 nodes): `UploadSection.jsx`, `UploadSection()`
+- **Thin community `Community 17`** (2 nodes): `TopNav.jsx`, `TopNav()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (1 nodes): `check_gh.py`
+- **Thin community `Community 18`** (2 nodes): `UploadSection.jsx`, `UploadSection()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (1 nodes): `check_gh_diff.py`
+- **Thin community `Community 19`** (1 nodes): `check_gh.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (1 nodes): `smoke_test.py`
+- **Thin community `Community 20`** (1 nodes): `check_gh_diff.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `test_hf.py`
+- **Thin community `Community 21`** (1 nodes): `smoke_test.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `__init__.py`
+- **Thin community `Community 22`** (1 nodes): `test_hf.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 23`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 24`** (1 nodes): `eslint.config.js`
+- **Thin community `Community 24`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (1 nodes): `postcss.config.js`
+- **Thin community `Community 25`** (1 nodes): `eslint.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (1 nodes): `vite.config.js`
+- **Thin community `Community 26`** (1 nodes): `postcss.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `main.jsx`
+- **Thin community `Community 27`** (1 nodes): `vite.config.js`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 28`** (1 nodes): `main.jsx`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 29`** (1 nodes): `Returns the list of filenames currently in the persistent cloud database.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 30`** (1 nodes): `Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 31`** (1 nodes): `Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 32`** (1 nodes): `Deletes a specific resume and its chunks using a query parameter for robustness.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 33`** (1 nodes): `Clears all resumes and chunks from the system.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `test_diagnostics()` connect `Community 1` to `Community 2`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `extract_text_from_pdf()` connect `Community 2` to `Community 1`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `compare_candidates_endpoint()` connect `Community 2` to `Community 0`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Why does `upload_resumes()` connect `Community 7` to `Community 0`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `test_diagnostics()` connect `Community 1` to `Community 3`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `test_diagnostics()` (e.g. with `extract_text_from_pdf()` and `.get_embeddings()`) actually correct?**
   _`test_diagnostics()` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Returns the list of filenames currently in the persistent cloud database.`, `Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence`, `Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct` to the rest of the system?**
-  _15 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Returns the list of filenames currently in the persistent cloud database.`, `Generate a qualitative comparison between two candidates using Groq.`, `Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence` to the rest of the system?**
+  _21 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.13 - nodes in this community are weakly interconnected._
