@@ -9,7 +9,7 @@ import ResultCard from './components/ResultCard';
 import ComparisonView from './components/ComparisonView';
 import Sidebar from './components/Sidebar';
 
-const API_BASE = "https://resume-screener.onrender.com";
+const API_BASE = "https://resume-screener-ojop.onrender.com";
 
 function App() {
   const [jd, setJd] = useState('');
