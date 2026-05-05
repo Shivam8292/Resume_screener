@@ -181,7 +181,7 @@ function App() {
           onRegistryClick={() => {}} 
         />
 
-        <main className="max-w-[800px] mx-auto pt-[120px] px-6 pb-24 w-full">
+        <main className="max-w-[800px] mx-auto pt-[60px] px-6 pb-24 w-full">
           <AnimatePresence mode="wait">
             {!isResultsMode && (
               <motion.div
