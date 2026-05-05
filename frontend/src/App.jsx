@@ -149,6 +149,7 @@ function App() {
     setComparison(null);
     setJd('');
     setError('');
+    setLastUploaded(null);
   };
 
   return (
@@ -205,7 +206,7 @@ function App() {
                     onUpload={handleUpload}
                     status={uploadStatus}
                     uploadedFiles={uploadedFiles}
-                    onRemoveFile={handleRemoveFile}
+                    onRemoveFile={() => setLastUploaded(null)}
                     lastFile={lastUploaded}
                   />
 
