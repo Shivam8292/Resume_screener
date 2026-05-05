@@ -1,3 +1,5 @@
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Plus, History, Trash2, Moon, Sun, Upload, FileText, Play } from 'lucide-react';
 
 const Sidebar = ({ 
