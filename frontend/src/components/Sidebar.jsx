@@ -1,6 +1,4 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Plus, History, Trash2, Moon, Sun, Upload, FileText, RefreshCw } from 'lucide-react';
+import { Plus, History, Trash2, Moon, Sun, Upload, FileText, Play } from 'lucide-react';
 
 const Sidebar = ({ 
   uploadedFiles, 
@@ -72,9 +70,9 @@ const Sidebar = ({
                   <button 
                     onClick={() => onProcessFile(file)}
                     className="p-1.5 hover:text-[var(--accent)] transition-colors"
-                    title="Re-sync"
+                    title="Analyze"
                   >
-                    <RefreshCw size={14} />
+                    <Play size={14} fill="currentColor" />
                   </button>
                   <button 
                     onClick={() => onRemoveFile(file)}

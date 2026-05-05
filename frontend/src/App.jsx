@@ -161,7 +161,12 @@ function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
-        onProcessFile={handleRank}
+        onProcessFile={(file) => {
+          setLastUploaded(file);
+          if (jd.trim()) {
+            handleRank();
+          }
+        }}
       />
 
       <input 
