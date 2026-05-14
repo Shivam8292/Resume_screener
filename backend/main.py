@@ -130,12 +130,20 @@ async def upload_resumes(files: list[UploadFile] = File(...)):
             error_msg = "; ".join(processing_errors) if processing_errors else "No valid text found"
             raise HTTPException(status_code=400, detail=f"Upload Failed: {error_msg}")
 
-        # 2. Batch Embedding Generation (Single API Call for ALL chunks)
+        # 2. Batch Embedding Generation (Processed in chunks to prevent API timeouts)
         logger.info(f"Generating embeddings for TOTAL {len(all_text_to_embed)} chunks across all files...")
-        all_embeddings = await asyncio.to_thread(embedding_service.get_embeddings, all_text_to_embed)
+        all_embeddings = []
+        BATCH_SIZE = 25 # Process 25 chunks at a time for optimal reliability
         
-        if not all_embeddings or len(all_embeddings) != len(all_text_to_embed):
-            raise HTTPException(status_code=500, detail="Batch embedding generation failed")
+        for i in range(0, len(all_text_to_embed), BATCH_SIZE):
+            batch = all_text_to_embed[i:i + BATCH_SIZE]
+            batch_embeddings = await asyncio.to_thread(embedding_service.get_embeddings, batch)
+            if not batch_embeddings:
+                raise HTTPException(status_code=500, detail=f"Embedding generation failed at batch {i//BATCH_SIZE}")
+            all_embeddings.extend(batch_embeddings)
+        
+        if len(all_embeddings) != len(all_text_to_embed):
+            raise HTTPException(status_code=500, detail="Incomplete embedding generation")
 
         # 3. Prepare Bulk Data for Database
         filenames_to_clean = [r["filename"] for r in all_resumes_to_upsert]
