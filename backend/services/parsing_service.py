@@ -1,20 +1,24 @@
 import os
 import json
-from groq import Groq
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class ParsingService:
     def __init__(self):
-        self.api_key = os.getenv("GROQ_API_KEY")
-        self.client = Groq(api_key=self.api_key) if self.api_key else None
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel("gemini-2.0-flash")
+        else:
+            self.model = None
 
     def parse_job_description(self, jd_text: str) -> dict:
         """
         Phase 3: Convert JD into structured categories.
         """
-        if not self.client:
+        if not self.model:
             return {"frontend": [], "backend": [], "database": [], "projects": [], "extras": []}
 
         prompt = f"""
@@ -42,13 +46,13 @@ class ParsingService:
         """
         
         try:
-            completion = self.client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
-                response_format={"type": "json_object"},
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.GenerationConfig(
+                    response_mime_type="application/json",
+                )
             )
-            content = completion.choices[0].message.content
-            return json.loads(content)
+            return json.loads(response.text)
         except Exception as e:
             print(f"JD Parsing Error: {e}")
             return {"pillars": [{"name": "Technical Skills", "requirements": []}]}

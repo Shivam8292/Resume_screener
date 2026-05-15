@@ -236,8 +236,9 @@ async def compare_candidates_endpoint(request: CompareRequest):
             }
 
         # 2. Use LLM for Qualitative "Reason"
-        from groq import Groq
-        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        gemini_model = genai.GenerativeModel("gemini-2.0-flash")
         
         prompt = f"""
         Act as a Senior Hiring Manager. Compare these two candidates for the Job Description.
@@ -253,13 +254,12 @@ async def compare_candidates_endpoint(request: CompareRequest):
         - better_candidate: "The filename of the winner"
         """
         
-        completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            response_format={"type": "json_object"},
+        response = gemini_model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(response_mime_type="application/json")
         )
         
-        verdict = json.loads(completion.choices[0].message.content)
+        verdict = json.loads(response.text)
         
         return {
             "reason": verdict.get("reason"),
@@ -372,8 +372,9 @@ async def improve_resume_endpoint(request: ImproveRequest):
         extracted_data = await asyncio.to_thread(extraction_service.extract_resume_data, resume_text)
         
         # Use LLM to suggest improvements against the specific JD categories
-        from groq import Groq
-        groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        gemini_model = genai.GenerativeModel("gemini-2.0-flash")
         
         prompt = f"""
         Act as an Elite Career Coach. Optimize this Resume for the Job Description.
@@ -387,12 +388,11 @@ async def improve_resume_endpoint(request: ImproveRequest):
         - suggestions: general strategic advice.
         """
         
-        completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            response_format={"type": "json_object"},
+        response = gemini_model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(response_mime_type="application/json")
         )
-        return json.loads(completion.choices[0].message.content)
+        return json.loads(response.text)
         
     except Exception as e:
         logger.error(f"Improvement Error: {str(e)}")

@@ -1,14 +1,18 @@
 import os
 import json
-from groq import Groq
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class ScoringService:
     def __init__(self):
-        self.api_key = os.getenv("GROQ_API_KEY")
-        self.client = Groq(api_key=self.api_key) if self.api_key else None
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel("gemini-2.0-flash")
+        else:
+            self.model = None
         self.weights = {
             "frontend": 30,
             "backend": 25,
@@ -22,7 +26,7 @@ class ScoringService:
         Evaluates the candidate against dynamic JD pillars.
         Returns a detailed report matching the requested high-fidelity UI.
         """
-        if not self.client:
+        if not self.model:
             return self._get_error_response("LLM Client not initialized.")
 
         pillars = structured_jd.get("pillars", [])
@@ -66,12 +70,13 @@ class ScoringService:
         """
         
         try:
-            completion = self.client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model="llama-3.3-70b-versatile",
-                response_format={"type": "json_object"},
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.GenerationConfig(
+                    response_mime_type="application/json",
+                )
             )
-            content = completion.choices[0].message.content
+            content = response.text
             analysis = json.loads(content)
             
             # Map back to final_score for backend compatibility
