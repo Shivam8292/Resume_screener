@@ -302,12 +302,18 @@ async def rank_resumes(request: RankRequest):
         logger.info(f"JD Parsed into categories: {list(structured_jd.keys())}")
         
         # 2. Phase 4: Extract Resume Data + Phase 5-10: Score (Parallel for all candidates)
-        # Filter: If specific filenames are requested, only process those. Otherwise, process all.
-        if request.filenames:
-            filenames = [f for f in list(resume_full_texts.keys()) if f in request.filenames]
+        # Filter: If specific filenames are requested, only process those. 
+        requested_files = request.filenames
+        if requested_files is not None and len(requested_files) > 0:
+            logger.info(f"Targeted analysis requested for: {requested_files}")
+            all_known_files = list(resume_full_texts.keys())
+            filenames = [f for f in all_known_files if f in requested_files]
+            
             if not filenames:
+                logger.error(f"None of the requested files {requested_files} found in {all_known_files}")
                 raise HTTPException(status_code=404, detail="Requested resumes not found in memory.")
         else:
+            logger.info("Batch analysis requested for all resumes.")
             filenames = list(resume_full_texts.keys())
         
         async def analyze_candidate(fname: str, full_text: str):

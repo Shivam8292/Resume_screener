@@ -94,6 +94,7 @@ function App() {
   };
 
   const handleRank = async (targetFiles = null) => {
+    setResults([]); // Clear previous results first
     setLoading(true);
     setError('');
     try {
