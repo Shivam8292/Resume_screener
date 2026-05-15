@@ -61,6 +61,7 @@ async def startup_event():
 
 class RankRequest(BaseModel):
     job_description: str
+    filenames: list[str] = None # Optional: Filter by specific files
 
 class CompareRequest(BaseModel):
     job_description: str
@@ -301,7 +302,13 @@ async def rank_resumes(request: RankRequest):
         logger.info(f"JD Parsed into categories: {list(structured_jd.keys())}")
         
         # 2. Phase 4: Extract Resume Data + Phase 5-10: Score (Parallel for all candidates)
-        filenames = list(resume_full_texts.keys())
+        # Filter: If specific filenames are requested, only process those. Otherwise, process all.
+        if request.filenames:
+            filenames = [f for f in list(resume_full_texts.keys()) if f in request.filenames]
+            if not filenames:
+                raise HTTPException(status_code=404, detail="Requested resumes not found in memory.")
+        else:
+            filenames = list(resume_full_texts.keys())
         
         async def analyze_candidate(fname: str, full_text: str):
             try:

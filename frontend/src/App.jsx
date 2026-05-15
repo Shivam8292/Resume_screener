@@ -93,11 +93,15 @@ function App() {
     }
   };
 
-  const handleRank = async () => {
+  const handleRank = async (targetFiles = null) => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${API_BASE}/rank`, { job_description: jd });
+      const payload = { 
+        job_description: jd,
+        filenames: targetFiles // Backend will only process these if provided
+      };
+      const res = await axios.post(`${API_BASE}/rank`, payload);
       setResults(res.data);
     } catch (err) {
       setError(`Analysis Failed: ${err.response?.data?.detail || err.message}`);
@@ -167,9 +171,10 @@ function App() {
         toggleTheme={toggleTheme}
         onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
         onProcessFile={(file) => {
-          setLastUploaded(file);
           if (jd.trim()) {
-            handleRank();
+            handleRank([file]);
+          } else {
+            setError("Please enter a Job Description first.");
           }
         }}
       />
