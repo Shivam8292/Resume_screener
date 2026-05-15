@@ -99,8 +99,8 @@ function App() {
       return;
     }
 
-    // Defensive check: If targetFiles is an event (e.g. from a button click), reset to null
-    const actualFiles = Array.isArray(targetFiles) ? targetFiles : null;
+    // Defensive check: If targetFiles is an event (e.g. from a button click), reset to empty array
+    const actualFiles = Array.isArray(targetFiles) ? targetFiles : [];
     
     setResults([]); 
     setLoading(true);

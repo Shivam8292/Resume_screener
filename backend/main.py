@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import os
+from typing import List, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -61,7 +62,7 @@ async def startup_event():
 
 class RankRequest(BaseModel):
     job_description: str
-    filenames: list[str] = None # Optional: Filter by specific files
+    filenames: Optional[List[str]] = []
 
 class CompareRequest(BaseModel):
     job_description: str
