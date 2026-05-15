@@ -24,6 +24,7 @@ function App() {
   const [isImproving, setIsImproving] = useState(false);
   const [lastUploaded, setLastUploaded] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [isInitialSyncing, setIsInitialSyncing] = useState(false);
 
   // Theme Sync
   useEffect(() => {
@@ -37,6 +38,7 @@ function App() {
 
   useEffect(() => {
     const fetchExisting = async () => {
+      setIsInitialSyncing(true);
       try {
         const res = await axios.get(`${API_BASE}/resumes`);
         if (res.data.resumes) {
@@ -45,6 +47,8 @@ function App() {
         }
       } catch (err) {
         console.error("Failed to fetch existing resumes", err);
+      } finally {
+        setIsInitialSyncing(false);
       }
     };
     fetchExisting();
@@ -155,6 +159,7 @@ function App() {
       
       <Sidebar 
         uploadedFiles={uploadedFiles}
+        isLoading={isInitialSyncing}
         onNewScan={resetToSetup}
         onRemoveFile={handleRemoveFile}
         onClearAll={handleClearAll}

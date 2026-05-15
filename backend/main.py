@@ -72,7 +72,18 @@ class ImproveRequest(BaseModel):
 
 @app.get("/resumes")
 async def get_uploaded_resumes():
-    """Returns the list of filenames currently in the persistent cloud database."""
+    """Returns filenames. If memory is empty (cold start), it fetches from Supabase."""
+    global resume_full_texts
+    if not resume_full_texts:
+        try:
+            logger.info("Memory empty, fetching filenames from Supabase...")
+            res = supabase.table("resumes").select("filename").execute()
+            for r in res.data:
+                if r["filename"] not in resume_full_texts:
+                    resume_full_texts[r["filename"]] = None
+        except Exception as e:
+            logger.error(f"On-demand fetch failed: {str(e)}")
+    
     return {"resumes": list(resume_full_texts.keys())}
 
 @app.get("/")

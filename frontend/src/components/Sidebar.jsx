@@ -4,6 +4,7 @@ import { Plus, History, Trash2, Moon, Sun, Upload, FileText, Play } from 'lucide
 
 const Sidebar = ({ 
   uploadedFiles, 
+  isLoading,
   onNewScan, 
   onRemoveFile, 
   onClearAll, 
@@ -45,7 +46,12 @@ const Sidebar = ({
       {/* History List */}
       <div className="flex-1 overflow-y-auto px-4 custom-scrollbar">
         <div className="space-y-2 pb-6">
-          {uploadedFiles.length === 0 ? (
+          {isLoading ? (
+            <div className="py-12 text-center opacity-40">
+              <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em]">Waking up engine...</p>
+            </div>
+          ) : uploadedFiles.length === 0 ? (
             <div className="py-12 text-center opacity-20">
               <History className="mx-auto mb-2" size={24} />
               <p className="text-[11px] font-bold uppercase tracking-widest">No history</p>
