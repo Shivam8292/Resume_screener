@@ -305,16 +305,16 @@ async def rank_resumes(request: RankRequest):
         # 2. Phase 4: Extract Resume Data + Phase 5-10: Score (Parallel for all candidates)
         # Filter: If specific filenames are requested, only process those. 
         requested_files = request.filenames
-        if requested_files is not None and len(requested_files) > 0:
-            logger.info(f"Targeted analysis requested for: {requested_files}")
-            all_known_files = list(resume_full_texts.keys())
-            filenames = [f for f in all_known_files if f in requested_files]
+        if requested_files and len(requested_files) > 0:
+            logger.info(f"STRICT FILTER: Processing only {requested_files}")
+            # Ensure exact match and avoid processing everything if no matches found
+            filenames = [f for f in list(resume_full_texts.keys()) if f in requested_files]
             
             if not filenames:
-                logger.error(f"None of the requested files {requested_files} found in {all_known_files}")
-                raise HTTPException(status_code=404, detail="Requested resumes not found in memory.")
+                logger.error(f"No matches for {requested_files} in {list(resume_full_texts.keys())}")
+                raise HTTPException(status_code=404, detail="Selected resumes not found.")
         else:
-            logger.info("Batch analysis requested for all resumes.")
+            logger.info("BATCH MODE: Processing all resumes.")
             filenames = list(resume_full_texts.keys())
         
         async def analyze_candidate(fname: str, full_text: str):
