@@ -94,13 +94,16 @@ function App() {
   };
 
   const handleRank = async (targetFiles = null) => {
-    setResults([]); // Clear previous results first
+    // Defensive check: If targetFiles is an event (e.g. from a button click), reset to null
+    const actualFiles = Array.isArray(targetFiles) ? targetFiles : null;
+    
+    setResults([]); 
     setLoading(true);
     setError('');
     try {
       const payload = { 
         job_description: jd,
-        filenames: targetFiles // Backend will only process these if provided
+        filenames: actualFiles
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
       setResults(res.data);
@@ -227,7 +230,7 @@ function App() {
                   <JDInput
                     value={jd}
                     onChange={setJd}
-                    onRank={handleRank}
+                    onRank={() => handleRank()}
                     loading={loading}
                     disabled={uploadedFiles.length === 0}
                   />
