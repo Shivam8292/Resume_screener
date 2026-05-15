@@ -19,45 +19,49 @@ class ScoringService:
 
     def compute_weighted_score(self, structured_jd: dict, extracted_resume: dict) -> dict:
         """
-        Phase 5, 6, 7, 8, 9, 10: The Core Intelligence Engine.
-        Returns a comprehensive analysis with weighted scores, evidence, and gaps.
+        Evaluates the candidate against dynamic JD pillars.
+        Returns a detailed report matching the requested high-fidelity UI.
         """
         if not self.client:
             return self._get_error_response("LLM Client not initialized.")
 
-        prompt = f"""
-        Act as an Elite Technical Recruiter. Evaluate the following Candidate Data against the Job Requirements.
+        pillars = structured_jd.get("pillars", [])
         
-        JOB REQUIREMENTS (Structured):
-        {json.dumps(structured_jd, indent=2)}
+        prompt = f"""
+        Act as an Elite Technical Recruiter and ATS Analyst. 
+        Evaluate the Candidate against the specific Evaluation Pillars identified from the Job Description.
+        
+        EVALUATION PILLARS:
+        {json.dumps(pillars, indent=2)}
         
         CANDIDATE DATA (Extracted):
         {json.dumps(extracted_resume, indent=2)}
         
-        CRITICAL SCORING RULES:
-        1. Rate match level for each category: frontend, backend, database, projects, extras (0.0 to 1.0).
-        2. ONLY reward points if the exact or semantically equivalent skill is found in the Candidate Data. 
-        3. STRICT PENALTY: If ANY skill or requirement explicitly requested in the JOB REQUIREMENTS is COMPLETELY MISSING from the Candidate Data, the corresponding category score MUST be severely penalized (0.0 to 0.3 maximum). ALWAYS verify evidence. Do NOT assume the candidate knows it based on unrelated experience.
-        4. MANDATORY FLOOR: If an important skill from the JD *is* present in the resume, the category score MUST be at least 0.85.
-        5. IGNORE SENIORITY BIAS: Do NOT deduct points because the candidate is a student or 'Junior' if they actually have the skills.
-        6. Extract EXACT evidence lines from the resume. If there is no evidence for a JD requirement, explicitly list it under "gaps".
-        7. CONFIDENCE: HIGH (Clear evidence), MEDIUM (Implied), LOW (Many missing items).
+        SCORING TASKS:
+        1. Evaluate each Pillar individually (0-100%).
+        2. Provide a 2-3 sentence "Reasoning" for each pillar score.
+        3. Formulate an "Evidence Question" and provide the "Evidence Answer" from the resume for each pillar.
+        4. Determine the overall "Status": "SHORTLIST" (Score > 75), "REVIEW" (Score 60-75), or "REJECT" (Score < 60).
+        5. Extract "Contact Email" from the candidate data if present.
         
-        Return ONLY a JSON object with this exact structure:
+        Return ONLY a JSON object with this structure:
         {{
-            "category_scores": {{
-                "frontend": 0.8,
-                "backend": 0.5,
-                "database": 0.9,
-                "projects": 0.7,
-                "extras": 0.6
-            }},
-            "strengths": [
-                {{ "skill": "React Development", "evidence": "Developed 15+ reusable React components..." }}
+            "ats_score": 85,
+            "status": "SHORTLIST",
+            "contact_email": "candidate@email.com",
+            "overall_reasoning": "Summary of the candidate fit.",
+            "detailed_evaluations": [
+                {{
+                    "pillar_name": "Category Name",
+                    "score": 90,
+                    "reasoning": "Detailed paragraph explaining why.",
+                    "evidence_question": "Question about the requirement?",
+                    "evidence_answer": "Direct evidence from the resume.",
+                    "is_strength": true
+                }},
+                ...
             ],
-            "gaps": ["No backend framework like FastAPI/Django detected", etc.],
-            "rationale": "2-3 line factual explanation.",
-            "confidence": "HIGH | MEDIUM | LOW"
+            "gaps": ["Gap 1", "Gap 2"]
         }}
         """
         
@@ -70,32 +74,8 @@ class ScoringService:
             content = completion.choices[0].message.content
             analysis = json.loads(content)
             
-            # Phase 5: Dynamic Weighting Fix
-            # Only count weights for categories that have requirements in the JD
-            # 'projects' is always active (20%)
-            active_weights = {"projects": 20}
-            for cat in ["frontend", "backend", "database", "extras"]:
-                if structured_jd.get(cat):
-                    active_weights[cat] = self.weights[cat]
-            
-            total_active_weight = sum(active_weights.values())
-            
-            # Compute Final Weighted Score using active categories only
-            weighted_sum = 0
-            cat_scores = analysis.get("category_scores", {})
-            
-            for cat, weight in active_weights.items():
-                score = cat_scores.get(cat, 0)
-                weighted_sum += (score * weight)
-            
-            # Normalize based on active weights (e.g., if only Frontend/Backend/Projects active, divide by 75)
-            final_normalized = (weighted_sum / total_active_weight) * 100 if total_active_weight > 0 else 0
-            
-            analysis["final_score"] = round(final_normalized, 1)
-            
-            # Add metadata for debugging
-            analysis["active_categories"] = list(active_weights.keys())
-            
+            # Map back to final_score for backend compatibility
+            analysis["final_score"] = analysis.get("ats_score", 0)
             return analysis
             
         except Exception as e:
@@ -105,11 +85,11 @@ class ScoringService:
     def _get_error_response(self, error_msg: str) -> dict:
         return {
             "final_score": 0,
-            "category_scores": {},
-            "strengths": [],
-            "gaps": [f"Scoring error: {error_msg}"],
-            "rationale": "Analysis failed due to a system error.",
-            "confidence": "LOW"
+            "ats_score": 0,
+            "status": "ERROR",
+            "detailed_evaluations": [],
+            "overall_reasoning": f"Analysis failed: {error_msg}",
+            "gaps": [error_msg]
         }
 
 # Singleton

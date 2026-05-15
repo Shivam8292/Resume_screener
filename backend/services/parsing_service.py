@@ -18,19 +18,26 @@ class ParsingService:
             return {"frontend": [], "backend": [], "database": [], "projects": [], "extras": []}
 
         prompt = f"""
-        Act as a Technical Architecture Parser. 
-        Categorize the following Job Description (JD) into specific technical requirements.
+        Act as a Senior Recruitment Architect. 
+        Analyze the following Job Description (JD) and identify the 4-6 most critical "Evaluation Pillars" for this role.
         
         Job Description:
         {jd_text}
         
-        Return ONLY a JSON object with this exact structure:
+        Rules:
+        1. Identify specific categories (e.g., "Frontend Architecture", "Core Java Expertise", "Project Leadership", "DevOps & Scaling").
+        2. Do NOT use generic "frontend", "backend" unless the JD is specifically structured that way.
+        3. For each pillar, list the specific requirements/skills found in the JD.
+        
+        Return ONLY a JSON object with this structure:
         {{
-            "frontend": ["React", "Tailwind", etc.],
-            "backend": ["Python", "FastAPI", "API Design", etc.],
-            "database": ["PostgreSQL", "SQL", "Redis", etc.],
-            "projects": ["SaaS development", "E-commerce", etc.],
-            "extras": ["Docker", "CI/CD", "Testing", etc.]
+            "pillars": [
+                {{
+                    "name": "Category Name",
+                    "requirements": ["Skill 1", "Skill 2"]
+                }},
+                ...
+            ]
         }}
         """
         
@@ -44,7 +51,7 @@ class ParsingService:
             return json.loads(content)
         except Exception as e:
             print(f"JD Parsing Error: {e}")
-            return {"frontend": [], "backend": [], "database": [], "projects": [], "extras": []}
+            return {"pillars": [{"name": "Technical Skills", "requirements": []}]}
 
 # Singleton
 parsing_service = ParsingService()
