@@ -123,7 +123,14 @@ function App() {
         filenames: filesToAnalyze
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
-      setResults(res.data);
+      
+      // BULLETPROOF: Even if backend returns all resumes, 
+      // only show the ones we actually asked for
+      let data = res.data;
+      if (filesToAnalyze.length > 0) {
+        data = data.filter(r => filesToAnalyze.includes(r.filename));
+      }
+      setResults(data);
     } catch (err) {
       setError(`Analysis Failed: ${err.response?.data?.detail || err.message}`);
     } finally {
