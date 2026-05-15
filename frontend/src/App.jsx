@@ -107,6 +107,7 @@ function App() {
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
       setResults(res.data);
+      setIsResultsMode(true); // THIS WAS MISSING
     } catch (err) {
       setError(`Analysis Failed: ${err.response?.data?.detail || err.message}`);
     } finally {
