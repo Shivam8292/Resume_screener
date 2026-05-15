@@ -20,6 +20,7 @@ function App() {
   const [selectedCandidates, setSelectedCandidates] = useState([]);
   const [comparison, setComparison] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [currentSessionFiles, setCurrentSessionFiles] = useState([]); // Files uploaded in THIS scan
   const [optimization, setOptimization] = useState(null);
   const [isImproving, setIsImproving] = useState(false);
   const [lastUploaded, setLastUploaded] = useState(null);
@@ -65,6 +66,7 @@ function App() {
       setUploadStatus(`Ready (${res.data.count})`);
       const newFiles = files.map(f => f.name);
       setUploadedFiles(prev => [...new Set([...prev, ...newFiles])]);
+      setCurrentSessionFiles(prev => [...new Set([...prev, ...newFiles])]); // Track session files
       setLastUploaded(newFiles[newFiles.length - 1]);
     } catch (err) {
       setUploadStatus('Sync failed');
@@ -99,8 +101,18 @@ function App() {
       return;
     }
 
-    // Defensive check: If targetFiles is an event (e.g. from a button click), reset to empty array
-    const actualFiles = Array.isArray(targetFiles) ? targetFiles : [];
+    // Determine which files to analyze:
+    // 1. If targetFiles is explicitly passed (e.g. from sidebar click), use those
+    // 2. Otherwise, use only files uploaded in the current session
+    let filesToAnalyze;
+    if (Array.isArray(targetFiles) && targetFiles.length > 0) {
+      filesToAnalyze = targetFiles;
+    } else if (currentSessionFiles.length > 0) {
+      filesToAnalyze = currentSessionFiles;
+    } else {
+      // No session files — user is re-analyzing from history, process all
+      filesToAnalyze = [];
+    }
     
     setResults([]); 
     setLoading(true);
@@ -108,7 +120,7 @@ function App() {
     try {
       const payload = { 
         job_description: jd,
-        filenames: actualFiles
+        filenames: filesToAnalyze
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
       setResults(res.data);
@@ -165,6 +177,7 @@ function App() {
     setJd('');
     setError('');
     setLastUploaded(null);
+    setCurrentSessionFiles([]); // Reset session files on New Scan
   };
 
   return (
