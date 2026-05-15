@@ -94,6 +94,11 @@ function App() {
   };
 
   const handleRank = async (targetFiles = null) => {
+    if (!jd.trim()) {
+      setError("Please enter a Job Description first.");
+      return;
+    }
+
     // Defensive check: If targetFiles is an event (e.g. from a button click), reset to null
     const actualFiles = Array.isArray(targetFiles) ? targetFiles : null;
     
@@ -176,10 +181,9 @@ function App() {
         toggleTheme={toggleTheme}
         onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
         onProcessFile={(file) => {
+          setLastUploaded(file); // Restore selection
           if (jd.trim()) {
             handleRank([file]);
-          } else {
-            setError("Please enter a Job Description first.");
           }
         }}
       />
