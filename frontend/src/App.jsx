@@ -12,7 +12,7 @@ import Sidebar from './components/Sidebar';
 
 import { supabase } from './supabaseClient';
 import Auth from './components/Auth';
-import { WifiOff, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { WifiOff, ShieldCheck, User as UserIcon, Sun, Moon } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const API_BASE = "https://resume-screener-ojop.onrender.com";
@@ -42,6 +42,8 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+
 
   useEffect(() => {
     let subscription = null;
@@ -294,6 +296,12 @@ function App() {
             )}
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl bg-[var(--bg-sunken)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
             {!showLanding && (
               <button 
                 onClick={goHome}
