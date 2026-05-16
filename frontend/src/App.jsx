@@ -42,14 +42,19 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    // Auth Listener
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    let subscription = null;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    // Auth Listener - only if Supabase is configured
+    if (supabase) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+      }).catch(() => {});
+
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+      });
+      subscription = data?.subscription;
+    }
 
     // Offline Listener (Point 2)
     const handleOnline = () => {
@@ -65,7 +70,7 @@ function App() {
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -287,7 +292,7 @@ function App() {
             </div>
             {isRecruiterMode && user && (
               <button 
-                onClick={() => supabase.auth.signOut()}
+                onClick={() => supabase?.auth.signOut()}
                 className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
                 title="Logout"
               >

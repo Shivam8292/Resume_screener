@@ -16,6 +16,7 @@ export default function Auth({ onAuthSuccess }) {
     setError(null);
 
     try {
+      if (!supabase) throw new Error('Auth not configured');
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -33,6 +34,7 @@ export default function Auth({ onAuthSuccess }) {
   };
 
   const handleGoogleLogin = async () => {
+    if (!supabase) return setError('Auth not configured');
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
     if (error) setError(error.message);
   };
