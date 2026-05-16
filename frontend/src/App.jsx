@@ -166,7 +166,13 @@ function App() {
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
       
-      let analysisList = res.data.results || [];
+      // Robust data handling: backend might return {results: []} or just []
+      let analysisList = [];
+      if (Array.isArray(res.data)) {
+        analysisList = res.data;
+      } else if (res.data && Array.isArray(res.data.results)) {
+        analysisList = res.data.results;
+      }
       
       setResults(analysisList);
     } catch (err) {
