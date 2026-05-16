@@ -163,11 +163,6 @@ function App() {
       
       let analysisList = res.data.results || [];
       
-      // Strict Data Isolation (Point 6)
-      if (!isRecruiterMode && filesToAnalyze.length > 0) {
-        analysisList = analysisList.filter(r => filesToAnalyze.includes(r.filename));
-      }
-      
       setResults(analysisList);
     } catch (err) {
       setError(`Analysis Failed: ${err.response?.data?.detail || err.message}`);
