@@ -83,20 +83,7 @@ export default function Auth({ onAuthSuccess }) {
         </button>
       </form>
 
-      <div className="relative my-8">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-[var(--border)]"></div></div>
-        <div className="relative flex justify-center text-xs uppercase"><span className="bg-[var(--bg-card)] px-2 text-[var(--text-secondary)]">Or continue with</span></div>
-      </div>
-
-      <button 
-        onClick={handleGoogleLogin}
-        className="w-full py-3 bg-[var(--bg-sunken)] border border-[var(--border)] rounded-xl flex items-center justify-center gap-2 hover:bg-[var(--bg-base)] transition-all"
-      >
-        <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-        Google
-      </button>
-
-      <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
+      <p className="mt-8 text-center text-sm text-[var(--text-secondary)]">
         {isLogin ? "Don't have an account?" : "Already have an account?"}
         <button onClick={() => setIsLogin(!isLogin)} className="ml-2 text-[#6366f1] font-semibold hover:underline">
           {isLogin ? 'Sign Up' : 'Login'}
