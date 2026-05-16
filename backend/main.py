@@ -1,7 +1,7 @@
 from __future__ import annotations
 import asyncio
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +9,8 @@ from supabase import create_client, Client
 import numpy as np
 import json
 import logging
+import time
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from dotenv import load_dotenv
 
 # Load Environment
@@ -42,6 +44,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Resilience Wrapper for LLM Calls
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type(Exception)
+)
+def call_llm_with_retry(service_func, *args, **kwargs):
+    """Wrapper to handle rate limits with retries."""
+    return service_func(*args, **kwargs)
 
 # In-memory storage (Hydrated from Supabase on startup)
 chunk_repository: list[dict] = []
@@ -222,9 +234,9 @@ async def compare_candidates_endpoint(request: CompareRequest):
                 raise HTTPException(status_code=404, detail=f"Candidate data for {fname} not found.")
             
             # Extract data for context
-            extracted = await asyncio.to_thread(extraction_service.extract_resume_data, text)
+            extracted = await asyncio.to_thread(call_llm_with_retry, extraction_service.extract_resume_data, text)
             # Get score
-            analysis = await asyncio.to_thread(scoring_service.compute_weighted_score, 
+            analysis = await asyncio.to_thread(call_llm_with_retry, scoring_service.compute_weighted_score, 
                                              parsing_service.parse_job_description(request.job_description), 
                                              extracted)
             
@@ -253,11 +265,14 @@ async def compare_candidates_endpoint(request: CompareRequest):
         - better_candidate: "The filename of the winner"
         """
         
-        completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
-            response_format={"type": "json_object"},
-        )
+        def _call_groq():
+            return groq_client.chat.completions.create(
+                messages=[{"role": "user", "content": prompt}],
+                model="llama-3.3-70b-versatile",
+                response_format={"type": "json_object"},
+            )
+
+        completion = call_llm_with_retry(_call_groq)
         
         verdict = json.loads(completion.choices[0].message.content)
         
@@ -299,7 +314,7 @@ async def rank_resumes(request: RankRequest):
         logger.info(f"--- Starting Recruiter-Grade Analysis Pipeline ---")
         
         # 1. Phase 3: Parse JD into Categories
-        structured_jd = await asyncio.to_thread(parsing_service.parse_job_description, request.job_description)
+        structured_jd = await asyncio.to_thread(call_llm_with_retry, parsing_service.parse_job_description, request.job_description)
         logger.info(f"JD Parsed into categories: {list(structured_jd.keys())}")
         
         # 2. Phase 4: Extract Resume Data + Phase 5-10: Score (Parallel for all candidates)

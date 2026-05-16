@@ -9,9 +9,17 @@ import ResultCard from './components/ResultCard';
 import ComparisonView from './components/ComparisonView';
 import Sidebar from './components/Sidebar';
 
+import { supabase } from './supabaseClient';
+import Auth from './components/Auth';
+import { WifiOff, ShieldCheck, User as UserIcon } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+
 const API_BASE = "https://resume-screener-ojop.onrender.com";
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [isRecruiterMode, setIsRecruiterMode] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [jd, setJd] = useState('');
   const [uploadStatus, setUploadStatus] = useState('');
   const [results, setResults] = useState([]);
@@ -33,11 +41,42 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    // Auth Listener
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Offline Listener (Point 2)
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success('You are back online!');
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error('Working offline. Some features may be limited.', { duration: 5000 });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const isResultsMode = results.length > 0;
 
   useEffect(() => {
+    if (!isRecruiterMode || !user) return;
     const fetchExisting = async () => {
       setIsInitialSyncing(true);
       try {
@@ -53,7 +92,7 @@ function App() {
       }
     };
     fetchExisting();
-  }, []);
+  }, [isRecruiterMode, user]);
 
   const handleUpload = async (files) => {
     setUploadStatus('Syncing...');
@@ -79,6 +118,7 @@ function App() {
     try {
       await axios.delete(`${API_BASE}/delete-resume?filename=${encodeURIComponent(filename)}`);
       setUploadedFiles(prev => prev.filter(f => f !== filename));
+      setCurrentSessionFiles(prev => prev.filter(f => f !== filename));
     } catch (err) {
       setError(`Delete Failed: ${err.message}`);
     }
@@ -88,6 +128,7 @@ function App() {
     try {
       await axios.post(`${API_BASE}/clear-data`);
       setUploadedFiles([]);
+      setCurrentSessionFiles([]);
       setResults([]);
       setError('');
     } catch (err) {
@@ -101,16 +142,12 @@ function App() {
       return;
     }
 
-    // Determine which files to analyze:
-    // 1. If targetFiles is explicitly passed (e.g. from sidebar click), use those
-    // 2. Otherwise, use only files uploaded in the current session
     let filesToAnalyze;
     if (Array.isArray(targetFiles) && targetFiles.length > 0) {
       filesToAnalyze = targetFiles;
     } else if (currentSessionFiles.length > 0) {
       filesToAnalyze = currentSessionFiles;
     } else {
-      // No session files — user is re-analyzing from history, process all
       filesToAnalyze = [];
     }
     
@@ -124,13 +161,14 @@ function App() {
       };
       const res = await axios.post(`${API_BASE}/rank`, payload);
       
-      // BULLETPROOF: Even if backend returns all resumes, 
-      // only show the ones we actually asked for
-      let data = res.data;
-      if (filesToAnalyze.length > 0) {
-        data = data.filter(r => filesToAnalyze.includes(r.filename));
+      let analysisList = res.data.results || [];
+      
+      // Strict Data Isolation (Point 6)
+      if (!isRecruiterMode && filesToAnalyze.length > 0) {
+        analysisList = analysisList.filter(r => filesToAnalyze.includes(r.filename));
       }
-      setResults(data);
+      
+      setResults(analysisList);
     } catch (err) {
       setError(`Analysis Failed: ${err.response?.data?.detail || err.message}`);
     } finally {
@@ -165,11 +203,11 @@ function App() {
     setIsImproving(true);
     setError('');
     try {
-      const res = await axios.post(`${API_BASE}/improve-resume`, {
+      const response = await axios.post(`${API_BASE}/improve-resume`, {
         job_description: jd,
         filename: filename
       });
-      setOptimization({ ...res.data, filename });
+      setOptimization({ ...response.data, filename });
     } catch (err) {
       setError('Optimization failed.');
     } finally {
@@ -184,48 +222,91 @@ function App() {
     setJd('');
     setError('');
     setLastUploaded(null);
-    setCurrentSessionFiles([]); // Reset session files on New Scan
+    setCurrentSessionFiles([]); 
   };
 
   return (
     <div className="flex h-screen w-full bg-[var(--bg-base)] text-[var(--text-primary)] font-[Inter] transition-colors duration-300">
+      <Toaster position="top-right" />
       
-      <Sidebar 
-        uploadedFiles={uploadedFiles}
-        isLoading={isInitialSyncing}
-        onNewScan={resetToSetup}
-        onRemoveFile={handleRemoveFile}
-        onClearAll={handleClearAll}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
-        onProcessFile={(file) => {
-          setLastUploaded(file); // Restore selection
-          if (jd.trim()) {
-            handleRank([file]);
-          }
-        }}
-      />
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-red-500 text-white text-center py-1 text-xs font-bold flex items-center justify-center gap-2">
+          <WifiOff size={14} /> YOU ARE OFFLINE - CHECK INTERNET CONNECTION
+        </div>
+      )}
+
+      {isRecruiterMode && user && (
+        <Sidebar 
+          uploadedFiles={uploadedFiles}
+          isLoading={isInitialSyncing}
+          onNewScan={resetToSetup}
+          onRemoveFile={handleRemoveFile}
+          onClearAll={handleClearAll}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
+          onProcessFile={(file) => {
+            setLastUploaded(file);
+            if (jd.trim()) {
+              handleRank([file]);
+            }
+          }}
+        />
+      )}
 
       <input 
         id="sidebar-upload"
         type="file" 
         multiple 
+        accept=".pdf"
         className="hidden" 
         onChange={(e) => handleUpload(Array.from(e.target.files))}
       />
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative">
-        <TopNav
-          uploadedCount={uploadedFiles.length}
-          onUploadClick={resetToSetup}
-          onReset={resetToSetup}
-          onRegistryClick={() => {}} 
-        />
+      <div className={`flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative ${(!isRecruiterMode || !user) ? 'max-w-4xl mx-auto' : ''}`}>
+        <div className="flex justify-between items-center p-6 bg-[var(--bg-base)] sticky top-0 z-10 border-b border-[var(--border)]">
+          <div className="flex items-center gap-4">
+             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
+              SleekScan AI
+            </h1>
+            {isRecruiterMode && user && (
+              <span className="flex items-center gap-1 text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20">
+                <ShieldCheck size={10} /> ORG MODE
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2 bg-[var(--bg-sunken)] p-1 rounded-xl border border-[var(--border)]">
+              <button 
+                onClick={() => setIsRecruiterMode(false)}
+                className={`px-4 py-2 rounded-lg text-sm transition-all ${!isRecruiterMode ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              >
+                Job Seeker
+              </button>
+              <button 
+                onClick={() => setIsRecruiterMode(true)}
+                className={`px-4 py-2 rounded-lg text-sm transition-all ${isRecruiterMode ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              >
+                Organization
+              </button>
+            </div>
+            {isRecruiterMode && user && (
+              <button 
+                onClick={() => supabase.auth.signOut()}
+                className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
+                title="Logout"
+              >
+                <UserIcon size={20} />
+              </button>
+            )}
+          </div>
+        </div>
 
-        <main className="max-w-[1000px] mx-auto pt-[60px] px-6 pb-24 w-full">
+        <main className="max-w-[1000px] mx-auto pt-12 px-6 pb-24 w-full">
           <AnimatePresence mode="wait">
-            {!isResultsMode && (
+            {isRecruiterMode && !user ? (
+                <Auth key="auth" onAuthSuccess={() => {}} />
+            ) : results.length === 0 ? (
               <motion.div
                 key="setup"
                 initial={{ opacity: 0, y: 10 }}
@@ -260,9 +341,7 @@ function App() {
                   />
                 </div>
               </motion.div>
-            )}
-
-            {isResultsMode && (
+            ) : (
               <motion.div
                 key="results"
                 initial={{ opacity: 0, y: 10 }}
@@ -315,9 +394,13 @@ function App() {
           )}
         </main>
 
-        <footer className="w-full py-12 border-t border-[var(--border)] flex flex-col items-center gap-2 opacity-40">
-          <span className="text-[10px] font-black uppercase tracking-[0.4em]">&copy; 2026 Developed by Shivam8292</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.2em]">Intelligent Screening System</span>
+        <footer className="mt-auto py-12 border-t border-[var(--border)] flex flex-col items-center gap-4 bg-[var(--bg-base)]">
+          <div className="flex gap-6 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+            <button className="hover:text-[var(--accent)] transition-colors">Privacy Policy</button>
+            <button className="hover:text-[var(--accent)] transition-colors">Terms of Service</button>
+            <button className="hover:text-[var(--accent)] transition-colors">Data Deletion</button>
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">&copy; 2026 Developed by Shivam8292 • Intelligent Screening</p>
         </footer>
       </div>
 

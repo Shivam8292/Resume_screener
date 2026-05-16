@@ -251,54 +251,54 @@
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L75",
-      "id": "main_rationale_75",
       "community": 0,
-      "norm_label": "returns the list of filenames currently in the persistent cloud database."
+      "norm_label": "returns the list of filenames currently in the persistent cloud database.",
+      "id": "main_rationale_75"
     },
     {
       "label": "Generate a qualitative comparison between two candidates using Groq.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L189",
-      "id": "main_rationale_189",
       "community": 2,
-      "norm_label": "generate a qualitative comparison between two candidates using groq."
+      "norm_label": "generate a qualitative comparison between two candidates using groq.",
+      "id": "main_rationale_189"
     },
     {
       "label": "Refined /rank endpoint (Phase 11-13).     Implements weighted scoring, evidence",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L255",
-      "id": "main_rationale_255",
       "community": 0,
-      "norm_label": "refined /rank endpoint (phase 11-13).     implements weighted scoring, evidence"
+      "norm_label": "refined /rank endpoint (phase 11-13).     implements weighted scoring, evidence",
+      "id": "main_rationale_255"
     },
     {
       "label": "Endpoint for Phase 12: ATS Optimizer.     Suggests improvements based on struct",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L329",
-      "id": "main_rationale_329",
       "community": 0,
-      "norm_label": "endpoint for phase 12: ats optimizer.     suggests improvements based on struct"
+      "norm_label": "endpoint for phase 12: ats optimizer.     suggests improvements based on struct",
+      "id": "main_rationale_329"
     },
     {
       "label": "Deletes a specific resume and its chunks using a query parameter for robustness.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L370",
-      "id": "main_rationale_370",
       "community": 0,
-      "norm_label": "deletes a specific resume and its chunks using a query parameter for robustness."
+      "norm_label": "deletes a specific resume and its chunks using a query parameter for robustness.",
+      "id": "main_rationale_370"
     },
     {
       "label": "Clears all resumes and chunks from the system.",
       "file_type": "rationale",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\backend\\main.py",
       "source_location": "L392",
-      "id": "main_rationale_392",
       "community": 0,
-      "norm_label": "clears all resumes and chunks from the system."
+      "norm_label": "clears all resumes and chunks from the system.",
+      "id": "main_rationale_392"
     },
     {
       "label": "test_hf.py",
@@ -709,7 +709,7 @@
       "label": "App()",
       "file_type": "code",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\frontend\\src\\App.jsx",
-      "source_location": "L16",
+      "source_location": "L14",
       "id": "app_app",
       "community": 12,
       "norm_label": "app()"
@@ -1650,7 +1650,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\shiva\\Desktop\\first_project\\frontend\\src\\App.jsx",
-      "source_location": "L16",
+      "source_location": "L14",
       "weight": 1.0,
       "_src": "c_users_shiva_desktop_first_project_frontend_src_app_jsx",
       "_tgt": "app_app",
