@@ -70,6 +70,7 @@ class ScoringService:
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
                 response_format={"type": "json_object"},
+                temperature=0.0,
             )
             content = completion.choices[0].message.content
             analysis = json.loads(content)
