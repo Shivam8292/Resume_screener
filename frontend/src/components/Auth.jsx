@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Mail, Lock, LogIn, UserPlus, Github } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Auth({ onAuthSuccess }) {
@@ -56,7 +56,7 @@ export default function Auth({ onAuthSuccess }) {
             placeholder="Work Email" 
             className="w-full pl-10 pr-4 py-3 bg-[var(--bg-sunken)] border border-[var(--border)] rounded-xl focus:ring-2 focus:ring-[#6366f1] outline-none"
             value={email}
-            onChange={(e) => setEmail(email)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="relative">
@@ -66,7 +66,7 @@ export default function Auth({ onAuthSuccess }) {
             placeholder="Password" 
             className="w-full pl-10 pr-4 py-3 bg-[var(--bg-sunken)] border border-[var(--border)] rounded-xl focus:ring-2 focus:ring-[#6366f1] outline-none"
             value={password}
-            onChange={(e) => setPassword(password)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
