@@ -349,6 +349,8 @@ async def rank_resumes(request: RankRequest):
                 analysis["projects"] = extracted_data.get("projects", [])
                 analysis["experience_years"] = extracted_data.get("experience_years", 0)
                 analysis["experience_level"] = extracted_data.get("experience_level", "Mid")
+                analysis["contact_email"] = extracted_data.get("contact_email", "N/A")
+                analysis["phone_number"] = extracted_data.get("phone_number", "N/A")
                 
                 return analysis
             except Exception as e:

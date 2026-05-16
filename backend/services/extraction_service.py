@@ -26,6 +26,8 @@ class ExtractionService:
         
         Return ONLY a JSON object with this exact structure:
         {{
+            "contact_email": "example@email.com",
+            "phone_number": "+1234567890",
             "skills": ["Python", "FastAPI", "React", etc.],
             "projects": ["Detail specific project name/impact", etc.],
             "experience_years": 5.5,

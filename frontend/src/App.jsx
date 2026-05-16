@@ -7,6 +7,7 @@ import UploadSection from './components/UploadSection';
 import JDInput from './components/JDInput';
 import ResultCard from './components/ResultCard';
 import ComparisonView from './components/ComparisonView';
+import LandingPage from './components/LandingPage';
 import Sidebar from './components/Sidebar';
 
 import { supabase } from './supabaseClient';
@@ -18,6 +19,7 @@ const API_BASE = "https://resume-screener-ojop.onrender.com";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [showLanding, setShowLanding] = useState(true);
   const [isRecruiterMode, setIsRecruiterMode] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [jd, setJd] = useState('');
@@ -228,7 +230,14 @@ function App() {
     setJd('');
     setError('');
     setLastUploaded(null);
-    setCurrentSessionFiles([]); 
+    if (!isRecruiterMode) {
+      setCurrentSessionFiles([]); 
+    }
+  };
+
+  const goHome = () => {
+    resetToSetup();
+    setShowLanding(true);
   };
 
   return (
@@ -272,31 +281,28 @@ function App() {
       <div className={`flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative ${(!isRecruiterMode || !user) ? 'max-w-4xl mx-auto' : ''}`}>
         <div className="flex justify-between items-center p-6 bg-[var(--bg-base)] sticky top-0 z-10 border-b border-[var(--border)]">
           <div className="flex items-center gap-4">
-             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
+             <h1 
+               onClick={goHome}
+               className="text-2xl font-bold bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
+             >
               SleekScan AI
             </h1>
-            {isRecruiterMode && user && (
+            {isRecruiterMode && user && !showLanding && (
               <span className="flex items-center gap-1 text-[10px] bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20">
                 <ShieldCheck size={10} /> ORG MODE
               </span>
             )}
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex gap-2 bg-[var(--bg-sunken)] p-1 rounded-xl border border-[var(--border)]">
+            {!showLanding && (
               <button 
-                onClick={() => setIsRecruiterMode(false)}
-                className={`px-4 py-2 rounded-lg text-sm transition-all ${!isRecruiterMode ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                onClick={goHome}
+                className="text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-lg hover:bg-[var(--bg-sunken)]"
               >
-                Job Seeker
+                Change Portal
               </button>
-              <button 
-                onClick={() => setIsRecruiterMode(true)}
-                className={`px-4 py-2 rounded-lg text-sm transition-all ${isRecruiterMode ? 'bg-[var(--accent)] text-white shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-              >
-                Organization
-              </button>
-            </div>
-            {isRecruiterMode && user && (
+            )}
+            {isRecruiterMode && user && !showLanding && (
               <button 
                 onClick={() => supabase?.auth.signOut()}
                 className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
@@ -310,7 +316,14 @@ function App() {
 
         <main className="max-w-[1000px] mx-auto pt-12 px-6 pb-24 w-full">
           <AnimatePresence mode="wait">
-            {isRecruiterMode && !user ? (
+            {showLanding ? (
+               <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                 <LandingPage onSelectMode={(mode) => {
+                   setIsRecruiterMode(mode === 'org');
+                   setShowLanding(false);
+                 }} />
+               </motion.div>
+            ) : isRecruiterMode && !user ? (
                 <Auth key="auth" onAuthSuccess={() => {}} />
             ) : results.length === 0 ? (
               <motion.div
@@ -381,6 +394,24 @@ function App() {
                     </motion.div>
                   ))}
                 </div>
+
+                {/* New Scan Option for Job Seeker Mode */}
+                {!isRecruiterMode && (
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    transition={{ delay: 0.5 }}
+                    className="mt-12 flex justify-center"
+                  >
+                    <button 
+                      onClick={resetToSetup}
+                      className="px-8 py-4 bg-[var(--bg-sunken)] border border-[var(--border)] rounded-2xl hover:bg-[var(--text-primary)] hover:text-[var(--bg-surface)] hover:border-[var(--text-primary)] transition-all font-bold tracking-wide flex items-center gap-3 shadow-sm"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7" /><line x1="16" y1="5" x2="22" y2="5" /><line x1="19" y1="2" x2="19" y2="8" /></svg>
+                      Start New Scan
+                    </button>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
