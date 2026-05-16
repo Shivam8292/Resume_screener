@@ -264,6 +264,7 @@ function App() {
           onUploadClick={() => document.getElementById('sidebar-upload')?.click()}
           onProcessFile={(file) => {
             setLastUploaded(file);
+            setCurrentSessionFiles([file]);
             if (jd.trim()) {
               handleRank([file]);
             }
