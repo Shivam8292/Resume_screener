@@ -344,10 +344,12 @@ function App() {
               >
                 <div className="flex flex-col items-center mb-8">
                   <h1 className="font-display text-[48px] md:text-[68px] leading-tight font-normal tracking-[-0.04em] text-center italic bg-gradient-to-b from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent mb-2">
-                    Who's the right fit?
+                    {isRecruiterMode ? "Who's the right fit?" : "Are you a good fit?"}
                   </h1>
                   <p className="text-[15px] font-medium text-[var(--text-secondary)] text-center max-w-[480px] leading-relaxed">
-                    Detail the skills you need and I'll rank your candidates by relevance.
+                    {isRecruiterMode 
+                      ? "Detail the skills you need and I'll rank your candidates by relevance."
+                      : "Upload your resume and enter the target Job Description to analyze your match."}
                   </p>
                 </div>
 
