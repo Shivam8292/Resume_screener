@@ -6,6 +6,9 @@
 ![Tech Stack](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)
 ![Database](https://img.shields.io/badge/Persistence-Supabase-3ECF8E?style=for-the-badge&logo=supabase)
 ![Frontend](https://img.shields.io/badge/Core-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)
+![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
+### 🔗 Live URL: [https://resume-screener-eosin.vercel.app/](https://resume-screener-eosin.vercel.app/)
 
 ---
 
