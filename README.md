@@ -1,109 +1,151 @@
-#  Resume Intelligence: High-Precision Candidate Discovery
+#  SleekScan AI: Recruiter-Grade Resume Intelligence
 
-**SleekScan** is a production-grade, AI-driven resume screening application that goes beyond simple keyword matching. It uses Deep Semantic Embeddings and Large Language Models (LLM) to intelligently rank, analyze, and optimize resumes against specific job descriptions.
+[![Tech Stack](https://img.shields.io/badge/Stack-FastAPI%20%7C%20React%20%7C%20Groq%20%7C%20Supabase-blueviolet?style=for-the-badge)](https://github.com/Shivam8292/Resume_screener)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://resume-screener-eosin.vercel.app/)
 
-![Project Status](https://img.shields.io/badge/UI%2FUX-Apple%20Minimalist-black?style=for-the-badge)
-![Tech Stack](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)
-![Database](https://img.shields.io/badge/Persistence-Supabase-3ECF8E?style=for-the-badge&logo=supabase)
-![Frontend](https://img.shields.io/badge/Core-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)
-![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+SleekScan AI is a production-grade, AI-powered resume screening and ranking platform that transforms candidate sourcing. Utilizing **Deep Semantic Embeddings** and the **Llama-3.3-70b-versatile model** on Groq, it intelligently evaluates, scores, and critiques resumes against complex job descriptions, providing recruiters with instant matching rationales and candidates with actionable optimization advice.
 
-### 🔗 Live URL: [https://resume-screener-eosin.vercel.app/](https://resume-screener-eosin.vercel.app/)
+---
 
 ## 🎬 Live Demonstration
-
-![SleekScan AI Demo](./sleekscan_demo.webp)
-
----
-
-## 🎨 Design Philosophy: "The Modern Dashboard"
-
-This repository features a complete UI/UX overhaul inspired by ChatGPT-style productivity tools. We prioritized **persistent history**, **dynamic themes**, and **cinematic typography**.
-
-### Key UX Pillars:
-- **Persistent Sidebar**: A ChatGPT-inspired dashboard for managing resume history and global settings.
-- **Dual-Theme Engine**: Seamless transition between high-contrast **Light Mode** and deep **Dark Mode**.
-- **Glassmorphism**: A "Liquid Glass" navigation system with `backdrop-blur-2xl` and refractive shadows.
-- **Micro-Interactions**: Real-time upload status, spring-animated results, and requirement-stack validation.
+![SleekScan AI Premium Dashboard](./docs/demo.webp)
 
 ---
 
-## 🏗️ System Architecture
+## 🏛️ System Architecture & Workflow
+SleekScan AI executes resume parsing and candidate ranking through an asynchronous, high-performance search and evaluation pipeline.
 
 ```mermaid
 graph TD
-    User((User)) -->|Uploads PDF| FE[React Frontend]
-    User -->|Enters JD| FE
+    User((User)) -->|Uploads PDF / Enters JD| FE[React Frontend]
     FE -->|POST /upload-resumes| BE[FastAPI Backend]
-    BE -->|Super-Batch Text| PDF[PyMuPDF]
-    BE -->|Bulk Embeddings| HF[HuggingFace API]
-    BE -->|Bulk Upsert| SB[(Supabase)]
+    BE -->|Parallel Text Extraction| PyMuPDF[PyMuPDF Engine]
+    BE -->|Bulk Chunk Embeddings| HF[SentenceTransformers Local Model]
+    BE -->|Upsert Resumes & Chunks| SB[(Supabase Database)]
     
     FE -->|POST /rank| BE
-    BE -->|Fetch Embeddings| SB
-    BE -->|Semantic Match| RAG[RAG Logic]
-    BE -->|Deep Analysis| LLM[Groq Llama 3.3]
-    RAG -->|Similarity Scores| BE
-    LLM -->|Rationales & Gaps| BE
+    BE -->|Fetch Cached Text & Vectors| SB
+    BE -->|Semantic Match Filtering| Similarity[Cosine Similarity Check]
+    BE -->|Recruiter-Grade Score Calculation| Groq[Groq Llama 3.3]
+    Groq -->|Detailed Rationale & Evidence| BE
     BE -->|JSON Response| FE
-    FE -->|Renders Dashboard| User
+    FE -->|Renders Ranked UI Cards| User
 ```
+
+* **Deterministic Intelligence Engine:** All LLM evaluations are strictly locked to `temperature=0.0`, eliminating model randomness and ensuring identical resume/JD combinations always yield identical scores.
+* **Super-Batch Parallel Execution:** Multiple candidate uploads are processed concurrently. Text extraction, semantic indexing, and Supabase upserts run in asynchronous batches, reducing database latency by up to 80%.
 
 ---
 
-## 🧠 Intelligent Features
+## 🛠️ Technology Stack
+| Component | Framework / Library | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | React 19, Vite 8, Tailwind CSS v4, Framer Motion | Premium minimalist dashboard, hardware-accelerated transitions, fluid animations |
+| **Backend** | Python 3.11+, FastAPI, Uvicorn, Gunicorn | High-performance asynchronous REST API pipeline with robust error logging |
+| **Database** | Supabase, PostgreSQL | Relational storage for resumes and high-dimensional vector embeddings |
+| **AI LLM** | Groq SDK (`llama-3.3-70b-versatile`) | Fast, recruiter-grade candidate analysis, gap evaluation, and resume optimization suggestions |
+| **Embeddings** | HuggingFace Local `sentence-transformers` | Semantic similarity calculation and vector chunking |
+| **PDF Parser** | PyMuPDF (fitz) | Lightning-fast local PDF text extraction |
 
-### 1. Semantic RAG Engine
-Instead of matching local strings, we convert both the JD and the Resume into high-dimensional vectors. Conceptual matching allows the system to detect that "FastAPI" and "Django" both fit "Backend Developer" requirements.
+---
 
-### 2. Candidate Comparison Engine (New)
-Select any two candidates to generate a qualitative LLM-driven verdict. The system analyzes their relative strengths and provides a clear reasoning on who is the better fit for the specific JD.
-
-### 3. Super-Batch Processing
-Optimized for speed. Multiple resumes are processed in parallel, with bulk embedding generation and single-transaction database operations, reducing upload time by up to 80%.
-
-### 4. Recruiter-Grade Weighted Scoring
-- **Frontend (30%)**
-- **Backend (25%)**
-- **Database (15%)**
-- **Projects (20%)**
-- **Extras/Tools (10%)**
+## ✨ Features
+* **🎭 Dual-Portal Entry:** Smooth, zero-friction portal selector separating Job Seekers (no-login playground) and Organizations (full history tracking and recruitment pipeline).
+* **🌓 Dual Theme Engine:** Smooth, hardware-accelerated transitions between Light and Dark mode built on CSS Variables.
+* **🤖 Multi-Pillar Scoring Engine:** Analyzes candidates across Frontend, Backend, Database, Projects, and Extras using strict recruiter-grade rubrics.
+* **📄 Qualitative Candidate Comparison:** Select any two candidate cards to generate a head-to-head comparison and structured hiring verdict.
+* **🔧 Real-time ATS Optimizer:** Generates tailored suggestions, missing keywords, and custom bullet points to rewrite resumes matching the JD.
 
 ---
 
 ## 🚀 Quick Start (Local Development)
 
-### 1. Intelligence Engine (Backend)
+### Prerequisites
+* Python 3.11 or higher
+* Node.js 18 or higher
+* Supabase Account & Database
+* Groq API Key
+
+---
+
+### 1. Clone & Project Directory
 ```bash
-cd backend
-pip install -r requirements.txt
-# Configure your .env with SUPABASE_URL, SUPABASE_SERVICE_KEY, and GROQ_API_KEY
-uvicorn main:app --reload
+git clone https://github.com/Shivam8292/Resume_screener.git
+cd Resume_screener
 ```
 
-### 2. Interface (Frontend)
-```bash
-cd frontend
-npm install
-npm run dev
+---
+
+### 2. Backend Setup
+1. Navigate into the backend directory and set up a virtual environment:
+   ```bash
+   cd backend
+   python -m venv venv
+   # On Windows (PowerShell):
+   .\venv\Scripts\activate
+   # On Linux/macOS:
+   source venv/bin/activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Create your `.env` configuration file in the `backend/` directory:
+   ```env
+   SUPABASE_URL=your_supabase_url_here
+   SUPABASE_SERVICE_KEY=your_supabase_service_role_key_here
+   GROQ_API_KEY=your_groq_api_key_here
+   ```
+4. Start the development server:
+   ```bash
+   uvicorn main:app --reload --port 8000
+   ```
+
+---
+
+### 3. Frontend Setup
+1. Open a new terminal in the root directory and navigate to the frontend:
+   ```bash
+   cd frontend
+   ```
+2. Install Node packages:
+   ```bash
+   npm install
+   ```
+3. Start the Vite dev server:
+   ```bash
+   npm run dev
+   ```
+   The portal will boot up on `http://localhost:5173/`.
+
+---
+
+## 🔒 Security & API Keys
+> [!IMPORTANT]
+> The environment configuration file (`.env`) contains sensitive database and AI provider credentials and is **explicitly ignored** under Git control using `.gitignore` patterns. Do not commit or push `.env` files to public code repositories. If your keys are ever exposed, revoke them immediately.
+
+---
+
+## 📁 Repository Structure
 ```
-
----
-
-## 🛠 Features at a Glance
-- **Persistent History**: Never lose track of candidates with the new Sidebar cabinet.
-- **Theme Switcher**: Optimized for late-night screening sessions.
-- **ATS Optimizer**: Structured suggestions for bullet point rewriting.
-- **Fast Startup**: Optimized database hydration for near-instant cold starts.
-
----
-
-## 📜 Credits & Licensing
-- **Original Engine**: Developed by [Shivam8292](https://github.com/Shivam8292)
-- **UI/UX & Logic Refinement**: Optimized for Production Performance.
-- **License**: MIT License
-
----
-
-> [!NOTE]
-> This project is designed for high-end human resources screening. Always verify candidate credentials beyond automated scoring.
+├── backend/
+│   ├── services/                 # Business logic components
+│   │   ├── parsing_service.py    # JD structuring logic
+│   │   ├── extraction_service.py # Resume content structuring
+│   │   ├── scoring_service.py    # Multi-pillar deterministic grading
+│   │   └── embedding_service.py  # Local vector generation
+│   ├── main.py                   # FastAPI routing endpoints
+│   ├── requirements.txt
+│   └── .env                      # Local environment keys (ignored)
+├── frontend/
+│   ├── src/
+│   │   ├── components/           # UI widgets (LandingPage, ResultCard, Sidebar, etc.)
+│   │   ├── App.jsx               # Navigation router & state hub
+│   │   ├── index.css             # CSS tokens & custom styling overrides
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+└── docs/                         # Asset walk-throughs & demos
+    └── demo.webp                 # Fully-rendered workflow demonstration video
+```
