@@ -10,6 +10,10 @@
 
 ### 🔗 Live URL: [https://resume-screener-eosin.vercel.app/](https://resume-screener-eosin.vercel.app/)
 
+## 🎬 Live Demonstration
+
+![SleekScan AI Demo](./sleekscan_demo.webp)
+
 ---
 
 ## 🎨 Design Philosophy: "The Modern Dashboard"
